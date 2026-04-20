@@ -11,6 +11,7 @@ SKILLS=(
     "systematic-debugging"
     "test-driven-development"
     "writing-plans"
+    "token-optimization"
     "execute-task"
     "dispatching-parallel-agents"
     "executing-plans"

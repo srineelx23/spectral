@@ -14,10 +14,10 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
-what 
-**Save plans to:** `feature_directory/plan.md`
-- Identify `feature_directory` from `.spectral/feature.json`.
-- Populate `feature_directory/plan.md` using the template at `.spectral/templates/plan-template.md`.
+
+**Save plans to:** `.spectral/plan.md`
+- Write the implementation plan to `.spectral/plan.md` using the template at `.spectral/templates/plan-template.md`.
+- This keeps the plan in the task folder alongside the spec and other project metadata.
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -137,7 +137,7 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 After saving the plan, offer execution choice:
 
-**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Two execution options:**
+**"Plan complete and saved to `.spectral/plan.md`. Two execution options:**
 
 **1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
 
