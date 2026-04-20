@@ -1,77 +1,93 @@
-# Feature Specification: [FEATURE NAME]
+# {TICKET_ID} - Specification
 
-**Feature Branch**: `[###-feature-name]`  
-**Created**: [DATE]  
-**Status**: Draft  
-**Input**: User description: "$ARGUMENTS"
-
-## User Scenarios & Testing *(mandatory)*
-
-### User Story 1 - [Brief Title] (Priority: P1)
-
-[Describe this user journey in plain language]
-
-**Why this priority**: [Explain the value and why it has this priority level]
-
-**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by [specific action] and delivers [specific value]"]
-
-**Acceptance Scenarios**:
-
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
-2. **Given** [initial state], **When** [action], **Then** [expected outcome]
+## Overview
+[Brief description of the feature and its purpose]
 
 ---
 
-### User Story 2 - [Brief Title] (Priority: P2)
+## User Stories
 
-[Describe this user journey in plain language]
+### User Story 1 (Priority: P1)
+[Describe the primary user journey]
 
-**Why this priority**: [Explain the value and why it has this priority level]
-
-**Independent Test**: [Describe how this can be tested independently]
-
-**Acceptance Scenarios**:
-
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+**Acceptance Criteria:**
+- Given [state], When [action], Then [outcome]
+- Given [state], When [action], Then [outcome]
 
 ---
 
-### User Story 3 - [Brief Title] (Priority: P3)
+### User Story 2 (Priority: P2)
+[Describe secondary functionality]
 
-[Describe this user journey in plain language]
-
-**Why this priority**: [Explain the value and why it has this priority level]
-
-**Independent Test**: [Describe how this can be tested independently]
-
-**Acceptance Scenarios**:
-
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+**Acceptance Criteria:**
+- Given [state], When [action], Then [outcome]
 
 ---
 
-## Requirements *(mandatory)*
+### User Story 3 (Priority: P3)
+[Optional additional functionality]
+
+**Acceptance Criteria:**
+- Given [state], When [action], Then [outcome]
+
+---
+
+## Requirements
 
 ### Functional Requirements
+- FR-001: System MUST [specific capability]
+- FR-002: System MUST [specific capability]
+- FR-003: Users MUST be able to [interaction]
 
-- **FR-001**: System MUST [specific capability]
-- **FR-002**: System MUST [specific capability]  
-- **FR-003**: Users MUST be able to [key interaction]
+---
+
+## Assumptions
+- [Resolved assumption based on missing information]
+- [Default behavior chosen during brainstorming]
+
+---
+
+## Design Decisions
+- [Chosen approach and justification]
+- [Key architectural or behavioral decisions]
+
+---
+
+## System Flow
+
+1. [Step-by-step system execution]
+2. [Input → processing → output]
+3. [Validation and handling]
+
+---
+
+## Components
+
+- [Component Name]&#58; Responsibility
+- [Service/Module]&#58; Responsibility
+- [External Dependency]&#58; Role (if any)
+
+---
 
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes]
 - **[Entity 2]**: [What it represents, relationships]
 
-## Success Criteria *(mandatory)*
+---
 
-### Measurable Outcomes
+## Edge Cases
 
-- **SC-001**: [e.g., "Users can complete action in under 2 minutes"]
-- **SC-002**: [e.g., "System handles 1000 concurrent users"]
+- [Invalid input handling]
+- [Failure scenarios]
+- [Boundary conditions]
+- [Concurrency / performance edge cases]
 
-## Assumptions
+---
 
-- [Assumption about target users]
-- [Assumption about scope boundaries]
-- [Assumption about data/environment]
+## Success Criteria
+
+- SC-001: [Measurable outcome]
+- SC-002: [Performance / usability metric]
+
+
