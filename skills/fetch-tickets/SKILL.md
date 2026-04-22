@@ -1,6 +1,6 @@
 ---
 name: fetch-tickets
-description: "Retrieves tickets from external sources (Jira/Rally) and initializes them into the Spectral workspace as local folders and entries in the tasks.json registry."
+description: "Retrieves tickets from external sources (Jira) and initializes them into the Spectral workspace as local folders and entries in the tasks.json registry."
 ---
 
 # Fetch Tickets
@@ -9,6 +9,7 @@ Retrieve tickets from external sources and normalize them into the Spectral work
 
 ## Target Structure
 
+- **Configuration**: `.spectral/config.json`
 - **Ticket Folder**: `.spectral/tasks/{TICKET_ID}/`
 - **Ticket File**: `.spectral/tasks/{TICKET_ID}/ticket.md`
 - **Registry**: `.spectral/registry/tasks.json`
@@ -16,7 +17,9 @@ Retrieve tickets from external sources and normalize them into the Spectral work
 ## Steps
 
 ### 1. Fetch Tickets
-- Utilize available integrations to retrieve tickets from Jira or Rally.
+- **Check Configuration**: Check `.spectral/config.json` for `jiraHostname` or `jiraCloudId`.
+- **Ask & Store**: If missing, ask the human partner for the Jira site hostname/cloudId, then create/update `.spectral/config.json` with the value.
+- **Fetch**: Utilize available integrations to retrieve tickets using the stored configuration.
 - Extract: `id`, `title`, `description`, `acceptance criteria`, `priority`, and `url`.
 
 ### 2. Check for Duplicates
@@ -35,7 +38,7 @@ Retrieve tickets from external sources and normalize them into the Spectral work
 PENDING
 
 ## Source
-Jira / Rally
+Jira
 
 ## Priority
 {PRIORITY}
