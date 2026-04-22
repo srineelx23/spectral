@@ -28,6 +28,8 @@ Write the test first. Watch it fail. Write minimal code to pass.
 
 Thinking "skip TDD just this once"? Stop. That's rationalization.
 
+For UI and styling work, make the global styling change first, then verify once after the batch of edits. Do not use repeated build/test cycles to tune CSS one small adjustment at a time unless the failure you are fixing truly requires it.
+
 ## The Iron Law
 
 ```

@@ -29,6 +29,14 @@ For each task:
 3. Run verifications as specified
 4. Mark as completed
 
+### Verification pacing
+
+- Batch all planned edits for the current task before running build or test commands.
+- Do not run build/test after each small edit unless the task explicitly requires it.
+- Prefer one verification pass after a meaningful slice of work, then fix only if that pass exposes a real issue.
+- Avoid iterative CSS tuning loops; make the styling change broadly, then verify once.
+- If multiple files share one outcome, apply the full set of edits first and verify the combined result.
+
 ### Step 3: Complete Development
 
 After all tasks complete and verified:
