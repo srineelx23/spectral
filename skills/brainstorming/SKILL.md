@@ -16,7 +16,7 @@ Do NOT:
 
 ONLY produce the specification.
 </HARD-GATE>
-
+ 
 ## Task Selection
 
 - Load `.spectral/registry/tasks.json`

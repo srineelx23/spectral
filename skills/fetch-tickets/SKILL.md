@@ -9,6 +9,7 @@ Retrieve tickets from external sources and normalize them into the Spectral work
 
 ## Target Structure
 
+- **Configuration**: `.spectral/config.json`
 - **Ticket Folder**: `.spectral/tasks/{TICKET_ID}/`
 - **Ticket File**: `.spectral/tasks/{TICKET_ID}/ticket.md`
 - **Registry**: `.spectral/registry/tasks.json`
@@ -35,7 +36,7 @@ Retrieve tickets from external sources and normalize them into the Spectral work
 PENDING
 
 ## Source
-Jira 
+Jira
 
 ## Priority
 {PRIORITY}
