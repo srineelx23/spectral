@@ -14,6 +14,21 @@ const MAX_RG_MATCHES = 20;
 const MAX_RETURN_NODES = 8;
 const MIN_RETURN_NODES = 5;
 const MAX_TOTAL_LINES = 300;
+const UI_HINTS = new Set([
+  'ui', 'ux', 'frontend', 'front-end', 'html', 'css', 'scss', 'style', 'styles',
+  'template', 'layout', 'theme', 'dark', 'darkmode', 'dark-mode', 'component',
+  'components', 'view', 'views', 'page', 'pages', 'screen', 'screens', 'responsive',
+  'design', 'navbar', 'sidebar', 'modal', 'dialog', 'form', 'button'
+]);
+const BACKEND_HINTS = new Set([
+  'backend', 'back-end', 'api', 'server', 'service', 'services', 'endpoint', 'endpoints',
+  'route', 'routes', 'controller', 'controllers', 'database', 'db', 'sql', 'query',
+  'worker', 'job', 'queue', 'cache', 'auth', 'authorization', 'authentication', 'graphql'
+]);
+const COMPONENT_PATH_HINTS = [
+  '/component/', '/components/', '/page/', '/pages/', '/view/', '/views/', '/screen/',
+  '/screens/', '/ui/', '/feature/', '/features/', '/widget/', '/widgets/', '/dialog/', '/modal/'
+];
 
 function normalizePath(filePath) {
   return filePath.replace(/\\/g, '/');
@@ -33,6 +48,109 @@ function extractKeywords(task) {
         .filter((token) => !STOP_WORDS.has(token))
     )
   ).slice(0, 12);
+}
+
+function detectTaskType(task, keywords) {
+  const taskText = String(task || '').toLowerCase();
+  let uiScore = 0;
+  let backendScore = 0;
+
+  for (const keyword of keywords) {
+    if (UI_HINTS.has(keyword) || taskText.includes(keyword)) {
+      uiScore += 1;
+    }
+    if (BACKEND_HINTS.has(keyword) || taskText.includes(keyword)) {
+      backendScore += 1;
+    }
+  }
+
+  if (uiScore > backendScore && uiScore > 0) {
+    return 'ui';
+  }
+
+  if (backendScore > uiScore && backendScore > 0) {
+    return 'backend';
+  }
+
+  return 'general';
+}
+
+function isComponentPath(filePath) {
+  const normalized = normalizePath(String(filePath || '')).toLowerCase();
+  return COMPONENT_PATH_HINTS.some((hint) => normalized.includes(hint));
+}
+
+function isAllowedForTask(node, taskType) {
+  const language = String(node.language || '').toLowerCase();
+
+  if (taskType === 'ui') {
+    return language === 'html' || language === 'css' || language === 'scss' || language === 'typescript';
+  }
+
+  if (taskType === 'backend') {
+    return language === 'typescript' || language === 'javascript';
+  }
+
+  return ['html', 'css', 'scss', 'typescript', 'javascript'].includes(language);
+}
+
+function nodeCategory(node, taskType) {
+  const language = String(node.language || '').toLowerCase();
+  const type = String(node.type || '').toLowerCase();
+
+  if (taskType === 'ui') {
+    if (language === 'html' || type === 'template') {
+      return 'template';
+    }
+
+    if (language === 'css' || language === 'scss' || type === 'style') {
+      return 'style';
+    }
+
+    if (language === 'typescript' && isComponentPath(node.file)) {
+      return 'component';
+    }
+
+    if (language === 'typescript') {
+      return 'ui-code';
+    }
+
+    return null;
+  }
+
+  if (taskType === 'backend') {
+    if (language === 'typescript' || language === 'javascript') {
+      return 'backend';
+    }
+
+    return null;
+  }
+
+  if (language === 'html' || type === 'template') return 'template';
+  if (language === 'css' || language === 'scss' || type === 'style') return 'style';
+  if (language === 'typescript' && isComponentPath(node.file)) return 'component';
+  if (language === 'typescript' || language === 'javascript') return 'code';
+
+  return null;
+}
+
+function categoryPriority(category) {
+  switch (category) {
+    case 'template':
+      return 5;
+    case 'style':
+      return 4;
+    case 'component':
+      return 3;
+    case 'ui-code':
+      return 2;
+    case 'backend':
+      return 2;
+    case 'code':
+      return 1;
+    default:
+      return 0;
+  }
 }
 
 async function runRipgrep({ keywords, projectPath }) {
@@ -119,7 +237,7 @@ async function loadIndex(projectPath) {
   return Array.isArray(parsed) ? parsed : [];
 }
 
-function scoreNode(node, keywords, rgFiles) {
+function scoreNode(node, keywords, rgFiles, taskType) {
   const haystack = [
     node.name || '',
     node.type || '',
@@ -129,6 +247,10 @@ function scoreNode(node, keywords, rgFiles) {
   ].join('\n').toLowerCase();
 
   let score = 0;
+
+  const category = nodeCategory(node, taskType);
+  score += categoryPriority(category) * 20;
+
   for (const keyword of keywords) {
     const occurrences = haystack.split(keyword).length - 1;
     if (occurrences > 0) {
@@ -204,6 +326,82 @@ function pickWithinLineBudget(sortedNodes) {
   return selected;
 }
 
+function trimCodeToLines(code, maxLines) {
+  const lines = String(code || '').split(/\r?\n/);
+  if (lines.length <= maxLines) {
+    return String(code || '');
+  }
+
+  return lines.slice(0, maxLines).join('\n');
+}
+
+function compressSelectedNodes(nodes, maxTotalLines) {
+  const copies = nodes.map((node) => ({ ...node }));
+  let total = copies.reduce((sum, node) => sum + lineSpan(node), 0);
+
+  if (total <= maxTotalLines) {
+    return copies;
+  }
+
+  const order = copies
+    .map((node) => ({ node, priority: categoryPriority(node.category), span: lineSpan(node) }))
+    .sort((a, b) => a.priority - b.priority || b.span - a.span);
+
+  for (const { node } of order) {
+    if (total <= maxTotalLines) {
+      break;
+    }
+
+    const currentSpan = lineSpan(node);
+    if (currentSpan <= 1) {
+      continue;
+    }
+
+    const reducible = Math.min(currentSpan - 1, total - maxTotalLines);
+    const keepLines = currentSpan - reducible;
+    node.code = trimCodeToLines(node.code, keepLines);
+    node.end_line = Number(node.start_line) + keepLines - 1;
+    total -= reducible;
+  }
+
+  return copies;
+}
+
+function sortNodesForRetrieval(nodes) {
+  return [...nodes].sort((a, b) => {
+    const scoreDelta = (b.score || 0) - (a.score || 0);
+    if (scoreDelta !== 0) {
+      return scoreDelta;
+    }
+
+    const categoryDelta = categoryPriority(b.category) - categoryPriority(a.category);
+    if (categoryDelta !== 0) {
+      return categoryDelta;
+    }
+
+    const spanDelta = lineSpan(a.node) - lineSpan(b.node);
+    if (spanDelta !== 0) {
+      return spanDelta;
+    }
+
+    return String(a.node.file || '').localeCompare(String(b.node.file || ''));
+  });
+}
+
+function pickBestNode(nodes, selectedFiles) {
+  for (const candidate of sortNodesForRetrieval(nodes)) {
+    const fileKey = normalizePath(candidate.node.file || '');
+    if (selectedFiles.has(fileKey)) {
+      continue;
+    }
+
+    selectedFiles.add(fileKey);
+    return candidate;
+  }
+
+  return null;
+}
+
 export async function getRelevantCode({ task, projectPath }) {
   if (!projectPath) {
     throw new Error('getRelevantCode requires { projectPath }');
@@ -211,27 +409,82 @@ export async function getRelevantCode({ task, projectPath }) {
 
   const resolvedProjectPath = path.resolve(projectPath);
   const keywords = extractKeywords(task);
+  const taskType = detectTaskType(task, keywords);
   const rg = await runRipgrep({ keywords, projectPath: resolvedProjectPath });
   const indexNodes = await loadIndex(resolvedProjectPath);
 
-  const candidateNodes = rg.files.size > 0
-    ? indexNodes.filter((node) => rg.files.has(normalizePath(node.file || '')))
-    : indexNodes;
+  const taskFilteredNodes = indexNodes.filter((node) => isAllowedForTask(node, taskType));
+  const rgFilteredNodes = rg.files.size > 0
+    ? taskFilteredNodes.filter((node) => rg.files.has(normalizePath(node.file || '')))
+    : taskFilteredNodes;
 
-  const ranked = candidateNodes
-    .map((node) => ({ node, score: scoreNode(node, keywords, rg.files) }))
-    .filter((entry) => entry.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .map((entry) => entry.node);
+  let candidateNodes = rgFilteredNodes;
+  if (candidateNodes.length < MIN_RETURN_NODES) {
+    const supplemental = taskFilteredNodes.filter((node) => !candidateNodes.includes(node));
+    candidateNodes = candidateNodes.concat(supplemental);
+  }
 
-  const fallbackRanked = ranked.length > 0
-    ? ranked
+  const scored = candidateNodes
+    .map((node) => ({
+      node,
+      category: nodeCategory(node, taskType),
+      score: scoreNode(node, keywords, rg.files, taskType)
+    }))
+    .filter((entry) => entry.category !== null && entry.score > 0);
+
+  const ranked = scored.length > 0
+    ? scored
     : candidateNodes
-      .map((node) => ({ node, score: scoreNode(node, keywords, rg.files) }))
-      .sort((a, b) => b.score - a.score)
-      .map((entry) => entry.node);
+      .map((node) => ({
+        node,
+        category: nodeCategory(node, taskType),
+        score: scoreNode(node, keywords, rg.files, taskType)
+      }))
+      .filter((entry) => entry.category !== null)
+      .sort((a, b) => b.score - a.score || categoryPriority(b.category) - categoryPriority(a.category));
+
+  const selected = [];
+  const selectedFiles = new Set();
+
+  if (taskType === 'ui') {
+    const requiredCategories = ['template', 'style', 'component'];
+    for (const category of requiredCategories) {
+      const best = pickBestNode(ranked.filter((entry) => entry.category === category), selectedFiles);
+      if (best) {
+        selected.push(best);
+      }
+    }
+  }
+
+  const remaining = ranked
+    .filter((entry) => !selected.includes(entry))
+    .sort((a, b) => b.score - a.score || categoryPriority(b.category) - categoryPriority(a.category) || lineSpan(a.node) - lineSpan(b.node));
+
+  for (const entry of remaining) {
+    if (selected.length >= MAX_RETURN_NODES) {
+      break;
+    }
+
+    selected.push(entry);
+    if (selected.length >= MIN_RETURN_NODES && selected.reduce((sum, item) => sum + lineSpan(item.node), 0) >= MAX_TOTAL_LINES) {
+      break;
+    }
+  }
+
+  const deduped = selected
+    .map((entry) => entry.node)
+    .filter((node, index, array) => array.findIndex((candidate) => candidate.file === node.file && candidate.start_line === node.start_line) === index)
+    .slice(0, MAX_RETURN_NODES);
+
+  const compressed = compressSelectedNodes(deduped, MAX_TOTAL_LINES);
 
   return {
-    nodes: pickWithinLineBudget(fallbackRanked)
+    nodes: compressed
+      .sort((a, b) => {
+        const aCategory = nodeCategory(a, taskType);
+        const bCategory = nodeCategory(b, taskType);
+        return categoryPriority(bCategory) - categoryPriority(aCategory) || lineSpan(a) - lineSpan(b);
+      })
+      .slice(0, MAX_RETURN_NODES)
   };
 }

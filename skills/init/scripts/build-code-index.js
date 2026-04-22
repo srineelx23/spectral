@@ -14,7 +14,7 @@ const BINARY_EXTENSIONS = new Set([
   '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.ico', '.webp', '.pdf', '.zip', '.gz',
   '.tar', '.7z', '.exe', '.dll', '.so', '.dylib', '.class', '.jar', '.wasm'
 ]);
-const CHUNK_SIZE = 120;
+const CHUNK_SIZE = 150;
 const DEFAULT_CONCURRENCY = 8;
 
 const parserCtorCache = { value: null };
@@ -242,6 +242,7 @@ function extractByTreeSitter({ tree, source, language, relativeFile }) {
 function fallbackChunkFile({ source, language, relativeFile }) {
   const lines = source.split(/\r?\n/);
   const entries = [];
+  const type = language === 'html' ? 'template' : (language === 'css' || language === 'scss' ? 'style' : 'chunk');
 
   for (let start = 0; start < lines.length; start += CHUNK_SIZE) {
     const startLine = start + 1;
@@ -252,7 +253,7 @@ function fallbackChunkFile({ source, language, relativeFile }) {
       toEntry({
         file: relativeFile,
         language,
-        type: 'chunk',
+        type,
         name: `chunk_${Math.floor(start / CHUNK_SIZE) + 1}`,
         code,
         startLine,
