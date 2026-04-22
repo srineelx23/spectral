@@ -31,6 +31,20 @@ You MUST create a task for each of these items and complete them in order:
 8. **User reviews written spec** — ask user to review the spec file before proceeding
 9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
+## Token Efficiency Guardrails
+
+These rules are REQUIRED to reduce token usage while preserving design quality:
+
+- Keep context summaries delta-only. Do not restate full history when only one detail changed.
+- Use a clarifying-question budget based on scope:
+  - Simple change (1 file, low risk): max 2 questions
+  - Medium change (2-4 files): max 4 questions
+  - Complex change (5+ files or architecture): max 6 questions
+- Propose 2 approaches by default. Add a 3rd only when it is materially different.
+- Keep each design section concise by default (about 100-150 words) unless the user asks for deeper detail.
+- Avoid repeating accepted constraints and decisions in later messages; reference them briefly.
+- Preserve visual design support, but only use browser visuals when a visual comparison changes the decision.
+
 ## Process Flow
 
 ```dot
@@ -76,6 +90,7 @@ digraph brainstorming {
 - Prefer multiple choice questions when possible, but open-ended is fine too
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
 - Focus on understanding: purpose, constraints, success criteria
+- Stop asking questions once the decision-making surface is clear; move to approaches and design.
 
 **Exploring approaches:**
 
@@ -90,6 +105,7 @@ digraph brainstorming {
 - Ask after each section whether it looks right so far
 - Cover: architecture, components, data flow, error handling, testing
 - Be ready to go back and clarify if something doesn't make sense
+- Keep wording tight and avoid duplicating requirements already confirmed.
 
 **Design for isolation and clarity:**
 
@@ -107,12 +123,19 @@ digraph brainstorming {
 ## After the Design
 
 - **Documentation**: 
-  - Write the validated design (spec) to `.spectral/spec.md`.
+  - Determine next available sequence number by scanning `specs/` directory (e.g., if `001-x` exists, use `002`). Start at `001`.
+  - Create feature directory: `specs/<NNN>-<topic>/` (e.g., `specs/003-user-auth/`).
+  - Write the validated design (spec) to `specs/<NNN>-<topic>/spec.md`.
   - Copy `templates/spec-template.md` (from `.spectral/templates`) to use as the base if appropriate.
   - (User preferences for spec location override this default)
-  - This keeps the spec alongside the plan and other project metadata in a single `.spectral/` folder.
+  - Persist current feature path to `.spectral/feature.json`:
+    ```json
+    {
+      "feature_directory": "specs/<NNN>-<topic>"
+    }
+    ```
 - Use elements-of-style:writing-clearly-and-concisely skill if available
-- Commit the design document (`.spectral/spec.md`) to git
+- Commit the design document and `.spectral/feature.json` to git
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:
@@ -127,7 +150,7 @@ Fix any issues inline. No need to re-review — just fix and move on.
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:
 
-> "Spec written and committed to `.spectral/spec.md`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
+> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
 
 Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
 
@@ -155,6 +178,12 @@ A browser-based companion for showing mockups, diagrams, and visual options duri
 **This offer MUST be its own message.** Do not combine it with clarifying questions, context summaries, or any other content. The message should contain ONLY the offer above and nothing else. Wait for the user's response before continuing. If they decline, proceed with text-only brainstorming.
 
 **Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or the terminal. The test: **would the user understand this better by seeing it than reading it?**
+
+Token-saving defaults when visual companion is enabled:
+- Prefer terminal-first for requirement and trade-off questions; do not open the browser unless visuals change the decision.
+- When visuals are needed, show one consolidated comparison first (instead of multiple separate mockups).
+- Reuse the same browser page/session for follow-up visual iterations instead of regenerating from scratch.
+- After a visual decision is made, switch back to terminal text for subsequent non-visual questions.
 
 - **Use the browser** for content that IS visual — mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
 - **Use the terminal** for content that is text — requirements questions, conceptual choices, tradeoff lists, A/B/C/D text options, scope decisions

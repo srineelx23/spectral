@@ -11,14 +11,26 @@ Write comprehensive implementation plans assuming the engineer has zero context 
 
 Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
 
+## Token Efficiency Defaults
+
+Apply these defaults unless the user asks for extra depth:
+
+- If scope is small (1-2 files, low integration risk), create a compact plan with the minimum number of tasks needed.
+- Keep rationale concise; avoid repeating the same constraint text in every task.
+- Keep examples focused on changed code paths only; avoid large illustrative blocks that do not affect implementation.
+- Prefer explicit, short commands over long prose explanations.
+- If context is unchanged, reference prior decisions briefly instead of restating them.
+
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
-**Save plans to:** `.spectral/plan.md`
-- Write the implementation plan to `.spectral/plan.md` using the template at `.spectral/templates/plan-template.md`.
-- This keeps the plan in the task folder alongside the spec and other project metadata.
-- (User preferences for plan location override this default)
+**Save plans to:** `plan.md` inside the selected task folder.
+- Primary source: use the selected task folder/path from task metadata when available (for example `folder`, `path`, or `directory`).
+- If task metadata is missing, ask the user for the exact task folder before writing the plan.
+- Fallback for non-task workflows: use `.spectral/feature.json` only as a compatibility fallback.
+- Populate `<task-folder>/plan.md` using `.spectral/templates/plan-template.md`.
+- Do NOT create an extra `feature_directory` wrapper just to store the plan.
 
 ## Scope Check
 
@@ -137,7 +149,7 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 After saving the plan, offer execution choice:
 
-**"Plan complete and saved to `.spectral/plan.md`. Two execution options:**
+**"Plan complete and saved to `<task-folder>/plan.md`. Two execution options:**
 
 **1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
 

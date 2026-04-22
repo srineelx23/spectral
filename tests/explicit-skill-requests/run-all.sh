@@ -69,17 +69,6 @@ else
 fi
 echo ""
 
-# Test: token-optimization
-echo ">>> Test 6: token-optimization"
-if "$SCRIPT_DIR/run-test.sh" "token-optimization" "$PROMPTS_DIR/token-optimization.txt"; then
-    PASSED=$((PASSED + 1))
-    RESULTS="$RESULTS\nPASS: token-optimization"
-else
-    FAILED=$((FAILED + 1))
-    RESULTS="$RESULTS\nFAIL: token-optimization"
-fi
-echo ""
-
 echo "=== Summary ==="
 echo -e "$RESULTS"
 echo ""

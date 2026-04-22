@@ -1,1 +1,0 @@
-I need to add a gradient background to the hero section CSS. Can you help me optimize the approach to save tokens?
