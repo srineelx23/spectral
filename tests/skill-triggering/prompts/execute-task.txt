@@ -1,1 +1,1 @@
-I already fetched my tasks into tasks.json. Help me pick one task and execute it end-to-end.
+I already fetched my tasks into tasks.json. Help me pick one task and execute it end-to-end, or let me enter a custom prompt if I want to work on something not in the registry.

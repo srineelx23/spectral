@@ -33,6 +33,8 @@ For each task:
 
 - Batch all planned edits for the current task before running build or test commands.
 - Do not run build/test after each small edit unless the task explicitly requires it.
+- For runnable app or frontend changes, start the app or dev server and verify the changed flow works before running the scoped test command.
+- Run the tests after the runtime smoke check, not instead of it.
 - Prefer one verification pass after a meaningful slice of work, then fix only if that pass exposes a real issue.
 - Avoid iterative CSS tuning loops; make the styling change broadly, then verify once.
 - If multiple files share one outcome, apply the full set of edits first and verify the combined result.
