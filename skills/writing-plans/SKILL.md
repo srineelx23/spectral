@@ -9,6 +9,37 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 
 Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
 
+## Code Index Usage Rule
+
+## INDEX-FIRST EXECUTION POLICY
+
+- code_index.json is the primary source of truth
+- repository search is a last resort
+- file discovery MUST happen through index
+- repeated file reads are prohibited
+- task execution must minimize context size
+
+If index is available, ignoring it is considered a failure.
+
+This rule is mandatory and applies before any file search, file read, or repository scan.
+
+1. Load and consult `.spectral/code_index.json` first.
+2. Generate plans primarily from index metadata:
+    - `files.summary`
+    - `files.responsibility`
+    - dependency graph (`dependsOn`, `usedBy`)
+3. Plan should reference file paths directly from index.
+4. Do not read files for planning unless the index lacks necessary detail.
+5. Prefer zero-read planning.
+6. Maximum file reads during planning: 3.
+7. Use `dependsOn` to infer impact instead of scanning code.
+8. Do not use glob or grep when the index has relevant entries.
+9. If the index is missing or outdated, allow limited search only, capped at 3 files.
+
+Example:
+Instead of reading `app.ts`, use index context such as:
+"`app.ts` handles app logic and is used by `main.ts`"
+
 Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
 
 ## Token Efficiency Defaults
@@ -40,6 +71,11 @@ If the spec covers multiple independent subsystems, it should have been broken i
 ## File Structure
 
 Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
+
+- Derive file candidates from index metadata first (`files.summary`, `files.responsibility`, `dependsOn`, `usedBy`).
+- Use dependency links to infer impact and affected modules before opening source files.
+- If index summaries are sufficient, do not open files.
+- Only read files when index details are insufficient, and never exceed 3 reads.
 
 - Design units with clear boundaries and well-defined interfaces. Each file should have one clear responsibility.
 - You reason best about code you can hold in context at once, and your edits are more reliable when files are focused. Prefer smaller, focused files over large ones that do too much.

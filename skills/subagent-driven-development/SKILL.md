@@ -7,6 +7,43 @@ description: Use when executing implementation plans with independent tasks in t
 
 Execute plan by dispatching fresh subagent per task, with two-stage review after each: spec compliance review first, then code quality review.
 
+## Code Index Usage Rule
+
+## INDEX-FIRST EXECUTION POLICY
+
+- code_index.json is the primary source of truth
+- repository search is a last resort
+- file discovery MUST happen through index
+- repeated file reads are prohibited
+- task execution must minimize context size
+
+If index is available, ignoring it is considered a failure.
+
+This rule is mandatory and applies before any file search or repository scan.
+
+1. Load and consult `.spectral/code_index.json` first.
+2. Prefer `features` to identify feature-related files.
+3. Use `files` metadata to locate exact file paths.
+4. Expand only with `dependsOn` and `usedBy` when needed.
+5. Do not use glob or grep if the code index already contains relevant entries.
+6. Start with matching `featureTags` for the task, then expand through the dependency graph only if needed.
+7. Maximum files to read must come from the index, not from search.
+8. If the index is missing or outdated, allow limited search only, capped at 3 files.
+
+## Index-Filtered Subagent Context
+
+Subagents should operate on index-filtered file subsets only.
+
+- Each subagent must receive only relevant files selected from `.spectral/code_index.json`, never full-project context.
+- Partition subagent context using index features when work is independent:
+  - Subagent A -> feature `todo`
+  - Subagent B -> feature `theme`
+  - Subagent C -> UI-focused files
+- Prevent global repository reads inside subagents.
+- Prevent duplicate file reads across subagents by assigning non-overlapping file subsets when possible.
+- All subagents must inherit already-read file cache.
+- Token cap: maximum files per subagent = 5.
+
 **Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
 
 **Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
@@ -38,6 +75,14 @@ digraph when_to_use {
 - Faster iteration (no human-in-loop between tasks)
 
 ## The Process
+
+Before dispatching any subagent, do context partitioning from index:
+
+1. Load `.spectral/code_index.json`.
+2. Build per-subagent file subsets from `featureTags`, `summary`, `responsibility`, and dependency links.
+3. Attach only the subset relevant to that subagent's scope.
+4. Reuse already-read file cache across all subagents.
+5. Enforce max 5 files per subagent.
 
 ```dot
 digraph process {
@@ -239,6 +284,9 @@ Done!
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)
 - Make subagent read plan file (provide full text instead)
+- Give subagents full-repository context when index-filtered subsets are available
+- Allow global repo reads inside subagents
+- Allow duplicate file reads across subagents when cache/subset reuse is possible
 - Skip scene-setting context (subagent needs to understand where task fits)
 - Ignore subagent questions (answer before letting them proceed)
 - Accept "close enough" on spec compliance (spec reviewer found issues = not done)
@@ -246,6 +294,7 @@ Done!
 - Let implementer self-review replace actual review (both are needed)
 - **Start code quality review before spec compliance is ✅** (wrong order)
 - Move to next task while either review has open issues
+- Exceed 5 files of context per subagent
 
 **If subagent asks questions:**
 - Answer clearly and completely

@@ -7,6 +7,31 @@ description: "Used to select tasks from the registry and generate technical spec
 
 Select an active ticket and turn requirements into a formal design specification through deterministic analysis.
 
+## Code Index Usage Rule
+
+## INDEX-FIRST EXECUTION POLICY
+
+- code_index.json is the primary source of truth
+- repository search is a last resort
+- file discovery MUST happen through index
+- repeated file reads are prohibited
+- task execution must minimize context size
+
+If index is available, ignoring it is considered a failure.
+
+This rule is mandatory and applies before any file read, file search, or repository scan.
+
+1. Load and consult `.spectral/code_index.json` first.
+2. Use index metadata to understand feature boundaries, relevant modules, and dependencies before reading any file.
+3. Replace directory scanning with index lookup.
+4. Replace file discovery with feature mapping.
+5. Start from `featureTags`, then validate targets through file `summary` and `responsibility`.
+6. Expand only through `dependsOn` when strictly required.
+7. Do not use grep/glob when index entries are relevant and available.
+8. Prefer index summaries over file reads.
+9. Maximum files to read during brainstorming: 2.
+10. If index summaries are sufficient, do not read files at all.
+
 <HARD-GATE>
 Do NOT:
 - write code
@@ -55,7 +80,7 @@ Update in:
 
 1. **Select active ticket** — From `.spectral/registry/tasks.json`
 2. **Load ticket** — Read `.spectral/tasks/{TICKET_ID}/ticket.md`
-3. **Understand requirement** — Use `.spectral/code_index.json` as primary context
+3. **Understand requirement** — Use `.spectral/code_index.json` as primary context for feature boundaries, module mapping, and dependency expansion
 4. **Detect ambiguity** — Look for ambiguities impacting behavior or architecture
 5. **Apply Clarification Gate** — If needed, ask all questions and wait
 6. **Detect Tech Stack** — Load `.spectral/memory/tech_stack.json` to ensure design approach is compatible with the project's tech stack.
@@ -69,7 +94,10 @@ Update in:
 ## Context Usage
 
 - Use `.spectral/code_index.json` as primary source
-- Avoid unnecessary repository scanning
+- Replace repository scanning with index lookup and feature mapping
+- Prefer summaries in the index over opening files
+- Do not use grep/glob when index has relevant entries
+- Read at most 2 files during brainstorming, and only if summaries are insufficient
 
 ## Spec Output
 

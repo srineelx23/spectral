@@ -7,6 +7,29 @@ description: "Use when initializing a new Spectral workspace. Creates the .spect
 
 Use this skill when the user wants to initialize a new Spectral workspace in the current working directory.
 
+## Code Index Usage Rule
+
+## INDEX-FIRST EXECUTION POLICY
+
+- code_index.json is the primary source of truth
+- repository search is a last resort
+- file discovery MUST happen through index
+- repeated file reads are prohibited
+- task execution must minimize context size
+
+If index is available, ignoring it is considered a failure.
+
+This rule is mandatory and applies before any file search or repository scan.
+
+1. Load and consult `.spectral/code_index.json` first.
+2. Prefer `features` to identify feature-related files.
+3. Use `files` metadata to locate exact file paths.
+4. Expand only with `dependsOn` and `usedBy` when needed.
+5. Do not use glob or grep if the code index already contains relevant entries.
+6. Start with matching `featureTags` for the task, then expand through the dependency graph only if needed.
+7. Maximum files to read must come from the index, not from search.
+8. If the index is missing or outdated, allow limited search only, capped at 3 files.
+
 ## Index-First Retrieval Requirement
 
 After init, `.spectral/code_index.json` is the default source of truth for code discovery.
