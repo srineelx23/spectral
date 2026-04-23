@@ -33,6 +33,14 @@
 [SECTION_2_CONTENT]
 <!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
 
+## Tech Stack Enforcement
+
+All development must adhere to `.spectral/memory/tech_stack.json`.
+
+- No unauthorized frameworks
+- No version conflicts
+- Must follow stack conventions
+
 ## [SECTION_3_NAME]
 <!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
 

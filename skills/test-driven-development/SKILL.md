@@ -111,6 +111,7 @@ Vague name, tests mock not code
 - One behavior
 - Clear name
 - Real code (no mocks unless unavoidable)
+- **Tech Stack Compliance**: Use testing frameworks and libraries specified in `.spectral/memory/tech_stack.json`.
 
 ### Verify RED - Watch It Fail
 

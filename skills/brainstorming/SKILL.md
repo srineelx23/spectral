@@ -58,7 +58,8 @@ Update in:
 3. **Understand requirement** — Use `.spectral/code_index.json` as primary context
 4. **Detect ambiguity** — Look for ambiguities impacting behavior or architecture
 5. **Apply Clarification Gate** — If needed, ask all questions and wait
-6. **Define assumptions** — Explicitly state any assumptions made
+6. **Detect Tech Stack** — Load `.spectral/memory/tech_stack.json` to ensure design approach is compatible with the project's tech stack.
+7. **Define assumptions** — Explicitly state any assumptions made
 7. **Generate 2–3 approaches** — Include pros/cons for each
 8. **Select best approach** — Select one with justification
 9. **Define system design** — Map out components and flow
