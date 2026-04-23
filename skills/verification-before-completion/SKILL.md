@@ -37,6 +37,16 @@ BEFORE claiming any status or expressing satisfaction:
 Skip any step = lying, not verifying
 ```
 
+## Runtime First For Apps
+
+For runnable frontend or interactive work, verify the app itself before leaning on tests:
+
+1. Start the app or dev server.
+2. Exercise the changed user flow or behavior.
+3. Run the scoped tests for the touched piece of code.
+
+Tests confirm code-level expectations, but they do not replace a successful runtime check.
+
 ## Common Failures
 
 | Claim | Requires | Not Sufficient |
