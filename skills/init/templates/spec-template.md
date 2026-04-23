@@ -3,6 +3,9 @@
 ## Overview
 [Brief description of the feature and its purpose]
 
+## Tech Stack
+[Key technologies/libraries from .spectral/memory/tech_stack.json]
+
 ---
 
 ## User Stories

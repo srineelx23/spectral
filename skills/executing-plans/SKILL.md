@@ -94,6 +94,7 @@ After all tasks complete and verified:
 - Reference skills when plan says to
 - Stop when blocked, don't guess
 - Never start implementation on main/master branch without explicit user consent
+- **Tech Stack Enforcement**: All development must adhere to `.spectral/memory/tech_stack.json`. No unauthorized frameworks or version conflicts.
 
 ## Integration
 

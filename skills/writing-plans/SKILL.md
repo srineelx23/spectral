@@ -61,6 +61,7 @@ Apply these defaults unless the user asks for extra depth:
 - If task metadata is missing, ask the user for the exact task folder before writing the plan.
 - Fallback for non-task workflows: use `.spectral/feature.json` only as a compatibility fallback.
 - Populate `<task-folder>/plan.md` using `.spectral/templates/plan-template.md`.
+- **Tech Stack Compliance**: Load `.spectral/memory/tech_stack.json` before writing the plan. The plan must adhere to the detected tech stack (no unauthorized frameworks or version conflicts).
 - Do NOT create an extra `feature_directory` wrapper just to store the plan.
 
 ## Scope Check
@@ -105,7 +106,7 @@ This structure informs the task decomposition. Each task should produce self-con
 
 **Architecture:** [2-3 sentences about approach]
 
-**Tech Stack:** [Key technologies/libraries]
+**Tech Stack:** [Key technologies/libraries from .spectral/memory/tech_stack.json]
 
 ---
 ```

@@ -76,7 +76,7 @@ If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), 
     - Keep it in memory as `<compact rules summary>` for script input.
 
 3. **Execute Initialization Script Immediately**:
-    - Do NOT create any files manually before running the script.
+    - Do NOT create any fwhatiles manually before running the script.
     - Do NOT use shell commands for directory or file creation.
     - Directly run:
        - `node "~/.copilot/installed-plugins/spectral-marketplace/spectral/scripts/init.js"`
@@ -97,19 +97,50 @@ If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), 
    - Write a compact but concrete constitution directly to .spectral/memory/constitution.md using:
      - Project name from current directory
      - 5 concrete principles
+     - Tech Stack Enforcement section
      - User rules section
      - Workflow section
      - Governance section with current date
    - Never leave placeholders in .spectral/memory/constitution.md.
    - Keep output concise; avoid verbose narrative to reduce tokens.
 
-6. **Confirm**:
-   - Verify that the `.spectral` structure is complete and report success.
-   - Confirm that `.spectral/memory/constitution.md` contains concrete sections with no unresolved placeholder tokens.
-   - Confirm that `.spectral/code_index.json` exists and was generated as metadata-only output.
-   - Confirm that `.spectral/code_index.json` is pretty-printed (multi-line JSON with 2-space indentation).
+6. **Tech Stack Detection (Existing Projects Only)**:
+    - If the repository already contains source code, detect the tech stack before confirmation.
+    - **Detection Rules (High Priority Files Only)**:
+        - Check in this order:
+            1. **Node.js / Frontend / Fullstack**: `package.json` (extract dependencies, devDependencies, engines.node), lock files (`package-lock.json` / `yarn.lock` / `pnpm-lock.yaml`).
+            2. **Python**: `requirements.txt`, `pyproject.toml`, `Pipfile` / `poetry.lock`.
+            3. **Java**: `pom.xml`, `build.gradle`.
+            4. **DevOps**: `Dockerfile`, `docker-compose.yml`, `.github/workflows/`.
+            5. **Database**: dependencies (`mongoose`, `prisma`, `sequelize`, `sqlalchemy`, etc.), config files (`.env`, `config/`).
+    - **Extraction Output Format**:
+      Create structured output:
+      ```json
+      {
+        "project_type": "",
+        "frontend": { "framework": "", "version": "" },
+        "backend": { "runtime": "", "framework": "", "version": "" },
+        "database": "",
+        "testing": [],
+        "devops": [],
+        "confidence": 0.0
+      }
+      ```
+    - **Save Results**:
+      1. Write JSON to: `.spectral/memory/tech_stack.json`
+    - **Validation**:
+      - If confidence < 0.8:
+        Ask user: "I detected the following tech stack. Please confirm or correct it."
+      - Do NOT leave files empty.
 
-7. **User Confirmation Loop**:
-   - Show a concise summary of what was written.
-   - Ask: `I drafted your constitution in .spectral/memory/constitution.md. What would you like to change?`
-   - If user provides edits, update the constitution immediately.
+7. **Confirm**:
+    - Verify that the `.spectral` structure is complete and report success.
+    - Confirm that `.spectral/memory/constitution.md` contains concrete sections with no unresolved placeholder tokens.
+    - Confirm that `.spectral/memory/tech_stack.json` exists and contains the detected or confirmed stack.
+    - Confirm that `.spectral/code_index.json` exists and was generated as metadata-only output.
+    - Confirm that `.spectral/code_index.json` is pretty-printed (multi-line JSON with 2-space indentation).
+
+8. **User Confirmation Loop**:
+    - Show a concise summary of what was written.
+    - Ask: `I drafted your constitution in .spectral/memory/constitution.md and detected your tech stack in .spectral/memory/tech_stack.json. What would you like to change?`
+    - If user provides edits, update the constitution or tech stack immediately.

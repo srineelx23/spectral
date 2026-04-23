@@ -91,6 +91,7 @@ You MUST complete each phase before proceeding to the next.
    - Git diff, recent commits
    - New dependencies, config changes
    - Environmental differences
+   - **Tech Stack Compliance**: Verify changes against `.spectral/memory/tech_stack.json`.
 
 4. **Gather Evidence in Multi-Component Systems**
 
