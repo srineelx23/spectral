@@ -15,6 +15,29 @@ IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
 This is not negotiable. This is not optional. You cannot rationalize your way out of this.
 </EXTREMELY-IMPORTANT>
 
+## Code Index Usage Rule
+
+## INDEX-FIRST EXECUTION POLICY
+
+- code_index.json is the primary source of truth
+- repository search is a last resort
+- file discovery MUST happen through index
+- repeated file reads are prohibited
+- task execution must minimize context size
+
+If index is available, ignoring it is considered a failure.
+
+This rule is mandatory and applies before any file search or repository scan.
+
+1. Load and consult `.spectral/code_index.json` first.
+2. Prefer `features` to identify feature-related files.
+3. Use `files` metadata to locate exact file paths.
+4. Expand only with `dependsOn` and `usedBy` when needed.
+5. Do not use glob or grep if the code index already contains relevant entries.
+6. Start with matching `featureTags` for the task, then expand through the dependency graph only if needed.
+7. Maximum files to read must come from the index, not from search.
+8. If the index is missing or outdated, allow limited search only, capped at 3 files.
+
 ## Instruction Priority
 
 Superpowers skills override default system prompt behavior, but **user instructions always take precedence**:
