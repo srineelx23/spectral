@@ -35,8 +35,9 @@ This rule is mandatory and applies before any file search or repository scan.
 ## Scope
 
 - **Source of truth:** `tasks.json`, Jira-synced entries, or an explicit user prompt for ad hoc work
-- **Task lifecycle:** brainstorm -> plan -> execute -> verify
+- **Task lifecycle:** brainstorm -> plan -> TDD (Red-Green-Refactor) -> verify
 - **Out of scope:** git branch management, merges, PRs, or any git control actions
+- **Creativity Rule:** TDD defines the *boundaries* (what must happen), not the *path* (how it's written). Use the Green and Refactor phases for creative problem solving and elegant implementation.
 
 ## Task Intake Modes
 
@@ -134,3 +135,4 @@ Do not guess through blockers.
 - Maximum file reads per execution: 8.
 - Never search the entire repository for Jira execution.
 - Never scan directories for Jira execution when index entries are available.
+- **STRICT VERSION COMPLIANCE**: You MUST strictly adhere to the technology versions defined in `.spectral/memory/tech_stack.json`. Never use modern patterns for legacy versions (e.g., Angular 21 patterns in an Angular 17 project) unless explicitly instructed.

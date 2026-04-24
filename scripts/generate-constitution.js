@@ -28,7 +28,6 @@ function parseArgs(argv) {
       i += 1;
     }
   }
-
   return args;
 }
 
@@ -168,10 +167,23 @@ Operational constraints:
 export function generateConstitution({ targetDir = process.cwd(), outPath, rulesText = '' } = {}) {
   const resolvedTarget = path.resolve(targetDir);
   const packageJson = tryReadJson(path.join(resolvedTarget, 'package.json'));
-  const stacks = detectStack(resolvedTarget);
-  const tests = detectTesting(resolvedTarget, packageJson);
+  const techStack = tryReadJson(path.join(resolvedTarget, '.spectral', 'memory', 'tech_stack.json')) || {};
+
+  let stacks = detectStack(resolvedTarget);
+  let tests = detectTesting(resolvedTarget, packageJson);
   const folders = listTopLevelFolders(resolvedTarget);
   const userRules = normalizeRules(rulesText);
+  
+  // Apply Tech Stack Overrides & Angular Rules
+  if (techStack.frontend) {
+    const { framework, version } = techStack.frontend;
+    if (framework === 'Angular') {
+      const targetVersion = version && !version.includes('latest') ? version : '21 (Latest)';
+      userRules.unshift(`STRICT VERSION COMPLIANCE: This project uses Angular v${targetVersion}. You MUST strictly follow Angular v${targetVersion} standards. Never use newer patterns if an older version is specified.`);
+      stacks = [`${framework} ${version || ''}`];
+    }
+  }
+
   const today = new Date().toISOString().slice(0, 10);
   const projectName = path.basename(resolvedTarget) || 'Project';
 

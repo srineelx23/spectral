@@ -20,8 +20,8 @@ const sourceTemplatesDir = path.join(spectralRoot, 'skills', 'init', 'templates'
 async function init() {
     console.log(`Initializing Spectral in: ${targetDir}`);
     console.log("Running init.js via Node...");
-console.log("Platform:", process.platform);
-console.log("Shell env:", process.env.SHELL || process.env.ComSpec);
+    console.log("Platform:", process.platform);
+    console.log("Shell env:", process.env.SHELL || process.env.ComSpec);
     try {
         // 1. Create directory structure
         if (!fs.existsSync(spectralFolder)) fs.mkdirSync(spectralFolder);

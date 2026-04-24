@@ -75,6 +75,10 @@ If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), 
    - Keep this summary concise to reduce token usage.
     - Keep it in memory as `<compact rules summary>` for script input.
 
+**CRITICAL SEQUENCE**: You MUST complete the **Tech Stack Detection** (Step 6) and save `.spectral/memory/tech_stack.json` BEFORE finalizing the **Constitution**. The constitution must strictly reflect the versions detected.
+
+**STRICT VERSIONING RULE**: You MUST strictly adhere to the technology versions defined in `tech_stack_json`. Never use modern patterns for legacy versions (e.g., Angular 21 patterns in an Angular 17 project) unless explicitly instructed.
+
 3. **Execute Initialization Script Immediately**:
     - Do NOT create any fwhatiles manually before running the script.
     - Do NOT use shell commands for directory or file creation.
@@ -97,8 +101,8 @@ If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), 
    - Write a compact but concrete constitution directly to .spectral/memory/constitution.md using:
      - Project name from current directory
      - 5 concrete principles
-     - Tech Stack Enforcement section
-     - User rules section
+     - **Tech Stack Enforcement section**: MUST include a rule to strictly adhere to the versions in `tech_stack.json`. For Angular, always follow the latest (v21) unless an older version is detected, in which case strictly follow that version.
+     - User rules section (including prompts provided during init)
      - Workflow section
      - Governance section with current date
    - Never leave placeholders in .spectral/memory/constitution.md.
