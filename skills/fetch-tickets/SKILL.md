@@ -17,8 +17,9 @@ Retrieve tickets from external sources and normalize them into the Spectral work
 ## Steps
 
 ### 1. Fetch Tickets
-- Utilize available integrations to retrieve tickets from Jira.
-- Extract: `id`, `title`, `description`, `acceptance criteria`, `priority`, and `url`.
+- Use the Jira `cloudId` (retrieved from configuration or environment) to fetch tickets.
+- Do **NOT** use JQL or other search-based retrieval methods.
+- Extract: `id`, `title`, `description`, `acceptance criteria`, `priority`, `url`, and `status` (as `remoteStatus`).
 
 ### 2. Check for Duplicates
 - Open `.spectral/registry/tasks.json`.
@@ -71,7 +72,8 @@ Jira
   "id": "{TICKET_ID}",
   "title": "{TITLE}",
   "status": "PENDING",
-  "priority": "{PRIORITY}"
+  "priority": "{PRIORITY}",
+  "remoteStatus": "{REMOTE_STATUS}"
 }
 ```
 
@@ -80,3 +82,4 @@ Jira
 - **Data Integrity**: Do NOT overwrite existing folders or modify existing registry entries.
 - **No Inference**: Do NOT add assumptions or "clarifications" to the description.
 - **Normalization**: Clean and normalize description text; convert ACs to bullet points.
+- **Cloud ID Only**: Only retrieve tickets from the specified Jira `cloudId`. Do NOT use JQL.

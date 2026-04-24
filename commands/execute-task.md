@@ -1,5 +1,5 @@
 ---
-description: "Start the task lifecycle from tasks.json, Jira-synced entries, or a freeform prompt using the spectral:execute-task skill"
+description: "Deprecated - use the spectral:executing-tasks skill instead"
 ---
 
-Tell your human partner you are invoking the "spectral execute-task" skill to load a registry-backed task or accept a freeform prompt, then run the lifecycle for that selected work item.
+Tell your human partner that this command is deprecated and will be removed in the next major release. They should ask you to use the "spectral executing-tasks" skill instead.

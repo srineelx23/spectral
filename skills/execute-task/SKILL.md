@@ -47,6 +47,7 @@ If task metadata is incomplete, ask targeted clarification questions before plan
 
 3. **Set Active Status**
    - Mark selected registry task as `IN_PROGRESS` in `tasks.json`.
+   - **Jira Sync**: If the task originated from Jira, use `spectral:update-jira-status` to update the remote board to `IN_PROGRESS` or `Ongoing`.
    - Record `startedAt` timestamp if absent.
    - For freeform prompts, store the prompt text in the active session or task context that drives brainstorming and planning.
 
@@ -73,6 +74,7 @@ If task metadata is incomplete, ask targeted clarification questions before plan
 8. **Persist Outcome**
    - If complete: set registry task `status` to `DONE`, add `completedAt`.
    - If blocked: set registry task `status` to `BLOCKED`, add `blocker` notes.
+   - **Jira Sync**: If the task originated from Jira, use `spectral:update-jira-status` to update the remote board to `DONE` or `BLOCKED` (as appropriate).
    - For freeform prompts, persist the outcome in the session/task artifacts used by the lifecycle.
    - Save artifact references when available (`specPath`, `planPath`).
 
@@ -93,4 +95,5 @@ Do not guess through blockers.
 - Never infer hidden requirements; ask.
 - Never perform git control actions (branch creation, merge, PR, cleanup) as part of this skill.
 - Keep all lifecycle decisions and output scoped to the selected task.
+- **Automated Jira Sync**: Perform Jira status updates as a standard part of the task lifecycle without requiring additional explicit user prompts for each transition.
 - **Tech Stack Enforcement**: All development must adhere to `.spectral/memory/tech_stack.json`. No unauthorized frameworks or version conflicts.
