@@ -42,7 +42,7 @@ This rule is mandatory and applies before any file search or repository scan.
 ### 1. Fetch Tickets
 - Use the Jira `cloudId` (retrieved from configuration or environment) to fetch tickets.
 - Do **NOT** use JQL or other search-based retrieval methods.
-- Extract: `id`, `title`, `description`, `acceptance criteria`, `priority`, `url`, and `status` (as `remoteStatus`).
+- Extract: `id`, `title`, `description`, `acceptance criteria`, `priority`, `url`, `status` (as `remoteStatus`), and any other details if mentioned.
 
 ### 1.1 Extract Ticket Keywords
 - For each Jira ticket, extract keywords from `title` + `description`.
