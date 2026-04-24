@@ -94,10 +94,11 @@ If task metadata is incomplete, ask targeted clarification questions before plan
         1. `spectral:subagent-driven-development` (recommended)
         2. `spectral:executing-plans`
      5. **Read Once & Batch Edit**: Read selected files once; apply all planned edits in one batch per implementation slice.
-     6. **Verify Once**: Run verification (test/build) once after batched edits.
+     6. **Verify Results**: Run build, tests, and a **runtime smoke check** (e.g., `ng serve`) to verify the implementation works as expected in the browser/app.
 
 7. **Verify Completion**
    - Confirm required tests/checks pass.
+   - **Runtime Smoke Check**: For runnable apps or frontend changes, start the app (e.g., `npm run dev` or `ng serve`) and verify the implementation works as expected in the browser/app.
    - Confirm user-imposed constraints were followed.
    - Summarize results and remaining risks.
 
