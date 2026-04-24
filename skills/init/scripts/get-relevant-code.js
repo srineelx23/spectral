@@ -231,7 +231,7 @@ async function runRipgrep({ keywords, projectPath }) {
 }
 
 async function loadIndex(projectPath) {
-  const indexPath = path.join(projectPath, 'spectral', 'index.json');
+  const indexPath = path.join(projectPath, '.spectral', 'code_index.json');
   const raw = await fs.readFile(indexPath, 'utf8');
   const parsed = JSON.parse(raw);
   return Array.isArray(parsed) ? parsed : [];
