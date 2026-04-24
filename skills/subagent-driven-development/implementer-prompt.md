@@ -16,15 +16,13 @@ Task tool (general-purpose):
 
     [Scene-setting: where this fits, dependencies, architectural context]
 
-    ## Before You Begin
+    **Raise any concerns before starting work.**
 
-    If you have questions about:
-    - The requirements or acceptance criteria
-    - The approach or implementation strategy
-    - Dependencies or assumptions
-    - Anything unclear in the task description
+    ## Hard Rules (NON-NEGOTIABLE)
 
-    **Ask them now.** Raise any concerns before starting work.
+    1. **Strict Version Compliance**: You MUST strictly adhere to the technology versions defined in `.spectral/memory/tech_stack.json`. Never use modern patterns for legacy versions (e.g., Angular 21 patterns in a v17 project) unless explicitly instructed.
+    2. **No Unasked Refactoring**: Implement ONLY what is in the task. Do NOT restructure existing code, move logic between components, or refactor architecture unless the task specifically mandates "Refactor [X]".
+    3. **TDD First**: You MUST follow the `spectral:test-driven-development` skill. Write a failing test, watch it fail, then implement the minimal code to pass.
 
     ## Your Job
 
