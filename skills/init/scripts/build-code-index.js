@@ -332,7 +332,7 @@ export async function buildCodeIndex({ projectPath }) {
   );
 
   const entries = batches.flat();
-  const outPath = path.join(resolvedProjectPath, 'spectral', 'index.json');
+  const outPath = path.join(resolvedProjectPath, '.spectral', 'code_index.json');
 
   await fs.mkdir(path.dirname(outPath), { recursive: true });
   await fs.writeFile(outPath, JSON.stringify(entries, null, 2), 'utf8');

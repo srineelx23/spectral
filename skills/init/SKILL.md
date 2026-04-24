@@ -7,6 +7,29 @@ description: "Use when initializing a new Spectral workspace. Creates the .spect
 
 Use this skill when the user wants to initialize a new Spectral workspace in the current working directory.
 
+## Code Index Usage Rule
+
+## INDEX-FIRST EXECUTION POLICY
+
+- code_index.json is the primary source of truth
+- repository search is a last resort
+- file discovery MUST happen through index
+- repeated file reads are prohibited
+- task execution must minimize context size
+
+If index is available, ignoring it is considered a failure.
+
+This rule is mandatory and applies before any file search or repository scan.
+
+1. Load and consult `.spectral/code_index.json` first.
+2. Prefer `features` to identify feature-related files.
+3. Use `files` metadata to locate exact file paths.
+4. Expand only with `dependsOn` and `usedBy` when needed.
+5. Do not use glob or grep if the code index already contains relevant entries.
+6. Start with matching `featureTags` for the task, then expand through the dependency graph only if needed.
+7. Maximum files to read must come from the index, not from search.
+8. If the index is missing or outdated, allow limited search only, capped at 3 files.
+
 ## Index-First Retrieval Requirement
 
 After init, `.spectral/code_index.json` is the default source of truth for code discovery.
@@ -110,14 +133,71 @@ If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), 
         Ask user: "I detected the following tech stack. Please confirm or correct it."
       - Do NOT leave files empty.
 
-7. **Confirm**:
+7. **Generate Code Index**:
+    - Purpose: Create `.spectral/code_index.json`, a semantic metadata index of all project files.
+    - This index is the **PRIMARY SOURCE OF TRUTH** for all index-first file discovery across skills.
+    - **Index Structure** (version 2, metadata-only):
+      ```json
+      {
+        "version": 2,
+        "files": {
+          "path/to/file.ts": {
+            "language": "typescript|javascript|python|java|go|cpp|...",
+            "kind": "module|service|component|util|config",
+            "responsibility": "1-2 line description of what this file does",
+            "summary": "Full summary with dependencies count and consumers",
+            "featureTags": ["feature1", "feature2"],
+            "dependsOn": ["path/to/dep1.ts", "path/to/dep2.ts"],
+            "usedBy": ["path/to/consumer1.ts"],
+            "functions": [{name, purpose, calls}],
+            "mtimeMs": timestamp,
+            "size": bytes
+          }
+        },
+        "features": {
+          "todo": {"files": ["src/todo/index.ts", "src/todo/service.ts"]},
+          "auth": {"files": ["src/auth/login.ts", "src/auth/guard.ts"]}
+        },
+        "stats": {...}
+      }
+      ```
+    - **Generation Process**:
+      1. Run the code index generator:
+         - **Command**: `node "<spectral-repo>/scripts/generate-code-index.js" --target <project-root> --out .spectral/code_index.json --mode full`
+         - **Parameters**:
+           - `--target`: Project root directory (defaults to cwd)
+           - `--out`: Output path (defaults to `.spectral/code_index.json`)
+           - `--mode`: `full` for complete reindex, `incremental` to reuse unchanged files
+      2. The script will:
+         - Scan all meaningful source files (JS/TS/Python/Java/Go/C++)
+         - Extract semantic metadata: language, kind, responsibility, featureTags
+         - Infer `kind` from file path patterns (components/, services/, utils/, etc.)
+         - Derive `featureTags` from folder structure and content keywords
+         - Resolve internal imports to build `dependsOn` and `usedBy` graphs
+         - Build `features` map for deterministic feature-based file discovery
+         - Validate: fail if features map is empty or files lack summaries
+      3. Wait for completion and report:
+         - Number of files scanned, reused, changed, new, deleted
+         - Validation status: ✓ PASSED or ✗ FAILED with specific errors
+    - **Validation Guarantees**:
+      - Features map will never be empty (or generation fails)
+      - Every file will have a non-empty summary and responsibility
+      - Every file will have at least one featureTags entry (deterministic feature mapping)
+      - Dependency graph will be bidirectional (dependsOn ↔ usedBy)
+    - **Post-Generation**:
+      - Commit `.spectral/code_index.json` to version control
+      - Regenerate whenever major files are added/removed (or use `incremental` mode for fast updates)
+      - Use as primary input for brainstorming, planning, and task execution
+
+8. **Confirm**:
     - Verify that the `.spectral` structure is complete and report success.
     - Confirm that `.spectral/memory/constitution.md` contains concrete sections with no unresolved placeholder tokens.
     - Confirm that `.spectral/memory/tech_stack.json` exists and contains the detected or confirmed stack.
     - Confirm that `.spectral/code_index.json` exists and was generated as metadata-only output.
     - Confirm that `.spectral/code_index.json` is pretty-printed (multi-line JSON with 2-space indentation).
+    - Confirm that `.spectral/code_index.json` validation passed (no empty features, all files have summaries).
 
-8. **User Confirmation Loop**:
+9. **User Confirmation Loop**:
     - Show a concise summary of what was written.
-    - Ask: `I drafted your constitution in .spectral/memory/constitution.md and detected your tech stack in .spectral/memory/tech_stack.json. What would you like to change?`
-    - If user provides edits, update the constitution or tech stack immediately.
+    - Ask: `I drafted your constitution in .spectral/memory/constitution.md, detected your tech stack in .spectral/memory/tech_stack.json, and generated your code index in .spectral/code_index.json. What would you like to change?`
+    - If user provides edits, update the constitution, tech stack, or trigger code index regeneration immediately.

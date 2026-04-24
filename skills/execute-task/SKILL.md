@@ -7,6 +7,29 @@ description: Use when a task is captured in tasks.json, imported from Jira, or s
 
 Run a task-centered workflow from a registry entry or user-provided prompt: select or capture the work item, gather missing context, create a plan, execute it, and verify results.
 
+## Code Index Usage Rule
+
+## INDEX-FIRST EXECUTION POLICY
+
+- code_index.json is the primary source of truth
+- repository search is a last resort
+- file discovery MUST happen through index
+- repeated file reads are prohibited
+- task execution must minimize context size
+
+If index is available, ignoring it is considered a failure.
+
+This rule is mandatory and applies before any file search or repository scan.
+
+1. Load and consult `.spectral/code_index.json` first.
+2. Prefer `features` to identify feature-related files.
+3. Use `files` metadata to locate exact file paths.
+4. Expand only with `dependsOn` and `usedBy` when needed.
+5. Do not use glob or grep if the code index already contains relevant entries.
+6. Start with matching `featureTags` for the task, then expand through the dependency graph only if needed.
+7. Maximum files to read must come from the index, not from search.
+8. If the index is missing or outdated, allow limited search only, capped at 3 files.
+
 **Announce at start:** "I'm using the execute-task skill to run the selected task lifecycle."
 
 ## Scope
@@ -60,11 +83,17 @@ If task metadata is incomplete, ask targeted clarification questions before plan
    - **REQUIRED SUB-SKILL:** Use `spectral:writing-plans`.
    - Keep plan focused only on the selected task scope.
 
-6. **Execute Plan**
-   - Ask execution mode:
-     1. `spectral:subagent-driven-development` (recommended)
-     2. `spectral:executing-plans`
-   - Execute all plan steps and required verifications.
+6. **Execute Plan (Index-First Flow)**
+   - All Jira tasks and index-backed tasks must be resolved using the index-first strategy.
+   - **Execution Process**:
+     1. **Load `code_index.json`**: Load and validate `.spectral/code_index.json` before any file discovery action.
+     2. **Task to Feature Mapping**: Extract keywords (title/description for Jira) and match against `featureTags`, `summary`, and `responsibility` in the index.
+     3. **File Selection**: Select the minimum file set directly from index metadata (Primary files from feature matches, Secondary from `dependsOn`).
+     4. **Execution Mode**: Ask execution mode:
+        1. `spectral:subagent-driven-development` (recommended)
+        2. `spectral:executing-plans`
+     5. **Read Once & Batch Edit**: Read selected files once; apply all planned edits in one batch per implementation slice.
+     6. **Verify Once**: Run verification (test/build) once after batched edits.
 
 7. **Verify Completion**
    - Confirm required tests/checks pass.
@@ -77,6 +106,9 @@ If task metadata is incomplete, ask targeted clarification questions before plan
    - **Jira Sync**: If the task originated from Jira, use `spectral:update-jira-status` to update the remote board to `DONE` or `BLOCKED` (as appropriate).
    - For freeform prompts, persist the outcome in the session/task artifacts used by the lifecycle.
    - Save artifact references when available (`specPath`, `planPath`).
+
+Optimization:
+"If index provides sufficient context, skip reading files and directly edit using structural hints (functions, responsibilities)."
 
 ## Failure Handling
 
@@ -96,4 +128,9 @@ Do not guess through blockers.
 - Never perform git control actions (branch creation, merge, PR, cleanup) as part of this skill.
 - Keep all lifecycle decisions and output scoped to the selected task.
 - **Automated Jira Sync**: Perform Jira status updates as a standard part of the task lifecycle without requiring additional explicit user prompts for each transition.
-- **Tech Stack Enforcement**: All development must adhere to `.spectral/memory/tech_stack.json`. No unauthorized frameworks or version conflicts.
+- Never scan the entire `src` directory.
+- Never re-read files already loaded for the current execution.
+- Never call search tools if `code_index.json` has relevant entries.
+- Maximum file reads per execution: 8.
+- Never search the entire repository for Jira execution.
+- Never scan directories for Jira execution when index entries are available.
