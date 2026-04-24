@@ -40,8 +40,9 @@ This rule is mandatory and applies before any file search or repository scan.
 ## Steps
 
 ### 1. Fetch Tickets
-- Utilize available integrations to retrieve tickets from Jira.
-- Extract: `id`, `title`, `description`, `acceptance criteria`, `priority`, and `url`.
+- Use the Jira `cloudId` (retrieved from configuration or environment) to fetch tickets.
+- Do **NOT** use JQL or other search-based retrieval methods.
+- Extract: `id`, `title`, `description`, `acceptance criteria`, `priority`, `url`, and `status` (as `remoteStatus`).
 
 ### 1.1 Extract Ticket Keywords
 - For each Jira ticket, extract keywords from `title` + `description`.
@@ -109,9 +110,7 @@ Jira
   "title": "{TITLE}",
   "status": "PENDING",
   "priority": "{PRIORITY}",
-  "keywords": ["{KEYWORD_1}", "{KEYWORD_2}"],
-  "primaryFiles": ["{PRIMARY_FILE_PATH}"],
-  "secondaryFiles": ["{DEPENDENCY_FILE_PATH}"]
+  "remoteStatus": "{REMOTE_STATUS}"
 }
 ```
 
@@ -122,3 +121,4 @@ Jira
 - **Normalization**: Clean and normalize description text; convert ACs to bullet points.
 - **Index-First Jira Resolution**: All Jira tasks must be resolved using index-first strategy.
 - **No Global Search**: Do NOT search the entire repository or scan directories for Jira task file discovery.
+- **Cloud ID Only**: Only retrieve tickets from the specified Jira `cloudId`. Do NOT use JQL.
