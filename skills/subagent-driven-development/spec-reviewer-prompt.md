@@ -43,8 +43,9 @@ Task tool (general-purpose):
     - Are there requirements they skipped or missed?
     - Did they claim something works but didn't actually implement it?
 
-    **Extra/unneeded work:**
+    **Extra/unneeded work & Scope Creep:**
     - Did they build things that weren't requested?
+    - **Did they refactor or restructure existing code that was NOT in the spec?** (Flag any unasked moves of logic between components).
     - Did they over-engineer or add unnecessary features?
     - Did they add "nice to haves" that weren't in spec?
 
