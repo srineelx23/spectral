@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const INDEX_ROOT_CANDIDATES = ['src', 'app', 'lib'];
+const INDEX_ROOT_CANDIDATES = ['src', 'app', 'lib', 'skills', 'agents', 'commands', 'docs', 'hooks', 'scripts'];
 
 const EXCLUDED_DIRS = new Set([
   '.git',
@@ -36,7 +36,8 @@ const CODE_EXTENSIONS = new Set([
   '.js',
   '.jsx',
   '.mjs',
-  '.cjs'
+  '.cjs',
+  '.md'
 ]);
 
 const IMPORTANT_JSON_FILES = new Set([
@@ -432,7 +433,8 @@ async function buildFileEntry(file, allPathsSet) {
   const stat = fs.statSync(file.fullPath);
   const language = detectLanguage(file.relPath);
   const kind = inferKind(file.relPath, language);
-  const featureTags = inferFeatureTags(file.relPath, text);
+  const inferredFeatureTags = inferFeatureTags(file.relPath, text);
+  const featureTags = inferredFeatureTags.length > 0 ? inferredFeatureTags : ['core'];
   const imports = collectImports(text);
 
   const dependsOn = imports
@@ -444,6 +446,7 @@ async function buildFileEntry(file, allPathsSet) {
   const responsibility = inferResponsibility(kind, file.relPath, featureTags);
 
   return {
+    path: file.relPath,
     language,
     kind,
     responsibility,
@@ -473,6 +476,57 @@ function wireUsedBy(files) {
     entry.usedBy = Array.from(new Set(entry.usedBy)).sort();
     entry.summary = buildSummary(entry);
   }
+}
+
+function validateCodeIndex(files, features) {
+  const errors = [];
+  const warnings = [];
+
+  // Check 1: Features map is not empty
+  if (!features || Object.keys(features).length === 0) {
+    errors.push('CRITICAL: Features map is empty. No features derived from files.');
+  }
+
+  // Check 2: Every file has at least one feature tag
+  let missingFeatureTags = 0;
+  for (const [filePath, entry] of Object.entries(files)) {
+    if (!entry.featureTags || entry.featureTags.length === 0) {
+      missingFeatureTags += 1;
+      if (missingFeatureTags <= 5) {
+        errors.push(`${filePath}: Missing featureTags. File is not index-discoverable by feature.`);
+      }
+    }
+  }
+  if (missingFeatureTags > 5) {
+    errors.push(`... and ${missingFeatureTags - 5} more files missing featureTags.`);
+  }
+
+  // Check 3: All files have summaries
+  let missingSummaries = 0;
+  for (const [filePath, entry] of Object.entries(files)) {
+    if (!entry.summary || entry.summary.trim().length === 0) {
+      missingSummaries += 1;
+      if (missingSummaries <= 5) {
+        errors.push(`${filePath}: Missing summary. Summary is required for index-first mapping.`);
+      }
+    }
+  }
+  if (missingSummaries > 5) {
+    errors.push(`... and ${missingSummaries - 5} more files missing summaries.`);
+  }
+
+  // Check 4: All files have responsibility
+  let missingResponsibility = 0;
+  for (const [filePath, entry] of Object.entries(files)) {
+    if (!entry.responsibility || entry.responsibility.trim().length === 0) {
+      missingResponsibility += 1;
+    }
+  }
+  if (missingResponsibility > 0) {
+    warnings.push(`${missingResponsibility} files missing responsibility description.`);
+  }
+
+  return { errors, warnings };
 }
 
 export async function generateCodeIndex({
@@ -543,6 +597,16 @@ export async function generateCodeIndex({
   const features = createFeatureMap(files);
   const stats = summarizeStats(files, operationStats);
 
+  // Validate index quality
+  const validation = validateCodeIndex(files, features);
+  if (validation.errors.length > 0) {
+    const errorMsg = validation.errors.join('\n');
+    throw new Error(`Code index validation failed:\n${errorMsg}`);
+  }
+  if (validation.warnings.length > 0) {
+    console.warn(`⚠ Code index warnings:\n${validation.warnings.join('\n')}\n`);
+  }
+
   const result = {
     version: 2,
     mode,
@@ -561,7 +625,8 @@ export async function generateCodeIndex({
 
   return {
     outPath: outputPath,
-    stats
+    stats,
+    validation
   };
 }
 
@@ -580,6 +645,10 @@ async function cli() {
   console.log(`Changed: ${result.stats.changedFiles}`);
   console.log(`New: ${result.stats.newFiles}`);
   console.log(`Deleted: ${result.stats.deletedFiles}`);
+  console.log(`\nValidation: ${result.validation.errors.length === 0 ? '✓ PASSED' : '✗ FAILED'}`);
+  if (result.validation.warnings.length > 0) {
+    console.log(`Warnings: ${result.validation.warnings.length}`);
+  }
 }
 
 const __filename = fileURLToPath(import.meta.url);
