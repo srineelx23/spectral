@@ -66,10 +66,14 @@ async function init() {
         // 5. Generate a metadata-only code index for index-first retrieval.
         const codeIndexDest = path.join(spectralFolder, 'code_index.json');
         try {
+            // Use 'full' mode on first initialization, 'incremental' for updates
+            const indexExists = fs.existsSync(codeIndexDest);
+            const mode = indexExists ? 'incremental' : 'full';
+            
             const codeIndexResult = await generateCodeIndex({
                 targetDir,
                 outPath: codeIndexDest,
-                mode: 'incremental'
+                mode
             });
             console.log(
                 `Created: .spectral/code_index.json (${codeIndexResult.stats.scannedFiles} scanned, ${codeIndexResult.stats.reusedFiles} reused, ${codeIndexResult.stats.changedFiles} changed, ${codeIndexResult.stats.deletedFiles} deleted)`
