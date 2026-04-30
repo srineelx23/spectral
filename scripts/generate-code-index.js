@@ -599,12 +599,20 @@ export async function generateCodeIndex({
 
   // Validate index quality
   const validation = validateCodeIndex(files, features);
-  if (validation.errors.length > 0) {
-    const errorMsg = validation.errors.join('\n');
+  const hasIndexedFiles = Object.keys(files).length > 0;
+  const effectiveValidation = hasIndexedFiles
+    ? validation
+    : {
+        ...validation,
+        errors: validation.errors.filter((error) => !error.startsWith('CRITICAL: Features map is empty'))
+      };
+
+  if (effectiveValidation.errors.length > 0) {
+    const errorMsg = effectiveValidation.errors.join('\n');
     throw new Error(`Code index validation failed:\n${errorMsg}`);
   }
-  if (validation.warnings.length > 0) {
-    console.warn(`⚠ Code index warnings:\n${validation.warnings.join('\n')}\n`);
+  if (effectiveValidation.warnings.length > 0) {
+    console.warn(`⚠ Code index warnings:\n${effectiveValidation.warnings.join('\n')}\n`);
   }
 
   const result = {
@@ -626,7 +634,7 @@ export async function generateCodeIndex({
   return {
     outPath: outputPath,
     stats,
-    validation
+    validation: effectiveValidation
   };
 }
 

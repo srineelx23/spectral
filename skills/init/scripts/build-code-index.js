@@ -1,5 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { generateCodeIndex } from '../../../scripts/generate-code-index.js';
 
 const SKIP_DIRS = new Set(['node_modules', '.git', 'build', 'dist']);
 const SUPPORTED_EXTENSIONS = {
@@ -342,4 +344,52 @@ export async function buildCodeIndex({ projectPath }) {
     nodesExtracted: entries.length,
     timeTaken: Date.now() - startedAt
   };
+}
+
+async function cli() {
+  const args = process.argv.slice(2);
+  let targetDir = process.cwd();
+  let outPath = null;
+  let mode = 'full';
+
+  for (let index = 0; index < args.length; index += 1) {
+    const token = args[index];
+    const next = args[index + 1];
+
+    if (token === '--target' && next) {
+      targetDir = next;
+      index += 1;
+    } else if (token === '--out' && next) {
+      outPath = next;
+      index += 1;
+    } else if (token === '--mode' && next) {
+      if (next === 'full' || next === 'incremental') {
+        mode = next;
+      }
+      index += 1;
+    }
+  }
+
+  const result = await generateCodeIndex({
+    targetDir,
+    outPath,
+    mode
+  });
+
+  console.log(`Code index generated: ${result.outPath}`);
+  console.log(`Mode: ${result.stats.mode}`);
+  console.log(`Scanned: ${result.stats.scannedFiles}`);
+  console.log(`Reused: ${result.stats.reusedFiles}`);
+  console.log(`Changed: ${result.stats.changedFiles}`);
+  console.log(`New: ${result.stats.newFiles}`);
+  console.log(`Deleted: ${result.stats.deletedFiles}`);
+  console.log(`Validation: ${result.validation.errors.length === 0 ? 'PASSED' : 'FAILED'}`);
+}
+
+const __filename = fileURLToPath(import.meta.url);
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  cli().catch((error) => {
+    console.error(`Failed to generate code index: ${error.message}`);
+    process.exit(1);
+  });
 }
