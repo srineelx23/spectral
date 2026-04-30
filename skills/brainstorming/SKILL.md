@@ -32,6 +32,16 @@ This rule is mandatory and applies before any file read, file search, or reposit
 9. Maximum files to read during brainstorming: 2.
 10. If index summaries are sufficient, do not read files at all.
 
+## Enforced Index Refresh Gate
+
+Before any specification work begins, the agent MUST ensure `.spectral/code_index.json` exists and is current.
+
+1. Check whether `.spectral/code_index.json` exists.
+2. If it is missing, regenerate it with `--mode incremental` before continuing.
+3. If the workspace has changed since the index was generated, regenerate it with `--mode incremental` before continuing.
+4. If regeneration fails, stop and report `Index is insufficient`.
+5. Do not proceed to spec writing, file reads, or task selection until the refreshed index is available and valid.
+
 <HARD-GATE>
 Do NOT:
 - write code
@@ -80,16 +90,17 @@ Update in:
 
 1. **Select active ticket** — From `.spectral/registry/tasks.json`
 2. **Load ticket** — Read `.spectral/tasks/{TICKET_ID}/ticket.md`
-3. **Understand requirement** — Use `.spectral/code_index.json` as primary context for feature boundaries, module mapping, and dependency expansion
-4. **Detect ambiguity** — Look for ambiguities impacting behavior or architecture
-5. **Apply Clarification Gate** — If needed, ask all questions and wait
-6. **Detect Tech Stack** — Load `.spectral/memory/tech_stack.json` to ensure design approach is compatible with the project's tech stack.
-7. **Define assumptions** — Explicitly state any assumptions made
-7. **Generate 2–3 approaches** — Include pros/cons for each
-8. **Select best approach** — Select one with justification
-9. **Define system design** — Map out components and flow
-10. **Generate spec.md** — Save to `.spectral/tasks/{TICKET_ID}/spec.md`
-11. **Perform self-review** — Check for placeholders and contradictions
+3. **Refresh index gate** — Ensure `.spectral/code_index.json` exists and is current before any further reasoning. If missing or stale, regenerate it in incremental mode and validate the output.
+4. **Understand requirement** — Use `.spectral/code_index.json` as primary context for feature boundaries, module mapping, and dependency expansion
+5. **Detect ambiguity** — Look for ambiguities impacting behavior or architecture
+6. **Apply Clarification Gate** — If needed, ask all questions and wait
+7. **Detect Tech Stack** — Load `.spectral/memory/tech_stack.json` to ensure design approach is compatible with the project's tech stack.
+8. **Define assumptions** — Explicitly state any assumptions made
+9. **Generate 2–3 approaches** — Include pros/cons for each
+10. **Select best approach** — Select one with justification
+11. **Define system design** — Map out components and flow
+12. **Generate spec.md** — Save to `.spectral/tasks/{TICKET_ID}/spec.md`
+13. **Perform self-review** — Check for placeholders and contradictions
 
 ## Context Usage
 

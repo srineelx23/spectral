@@ -30,6 +30,16 @@ This rule is mandatory and applies before any file search or repository scan.
 7. Maximum files to read must come from the index, not from search.
 8. If the index is missing or outdated, allow limited search only, capped at 3 files.
 
+## Enforced Index Refresh Gate
+
+Before any task execution step, the agent MUST ensure `.spectral/code_index.json` exists and is current.
+
+1. Load `.spectral/code_index.json`.
+2. If it is missing, regenerate it with `--mode incremental` before any further discovery.
+3. If the workspace has changed since the index was generated, regenerate it with `--mode incremental` before any further discovery.
+4. If regeneration fails, stop and report `Index is insufficient`.
+5. Do not brainstorm, plan, or execute until the refreshed index is available and valid.
+
 **Announce at start:** "I'm using the execute-task skill to run the selected task lifecycle."
 
 ## Scope
@@ -87,7 +97,7 @@ If task metadata is incomplete, ask targeted clarification questions before plan
 6. **Execute Plan (Index-First Flow)**
    - All Jira tasks and index-backed tasks must be resolved using the index-first strategy.
    - **Execution Process**:
-     1. **Load `code_index.json`**: Load and validate `.spectral/code_index.json` before any file discovery action.
+        1. **Refresh `code_index.json`**: Load and validate `.spectral/code_index.json` before any file discovery action. If missing or stale, regenerate it in incremental mode first, then validate it.
      2. **Task to Feature Mapping**: Extract keywords (title/description for Jira) and match against `featureTags`, `summary`, and `responsibility` in the index.
      3. **File Selection**: Select the minimum file set directly from index metadata (Primary files from feature matches, Secondary from `dependsOn`).
      4. **Execution Mode**: Ask execution mode:

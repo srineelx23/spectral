@@ -36,6 +36,16 @@ This rule is mandatory and applies before any file search, file read, or reposit
 8. Do not use glob or grep when the index has relevant entries.
 9. If the index is missing or outdated, allow limited search only, capped at 3 files.
 
+## Enforced Index Refresh Gate
+
+Before writing a plan, the agent MUST ensure `.spectral/code_index.json` exists and is current.
+
+1. Load `.spectral/code_index.json`.
+2. If the file is missing, regenerate it with `--mode incremental` before planning.
+3. If the workspace has changed since the index was generated, regenerate it with `--mode incremental` before planning.
+4. If regeneration fails, stop and report `Index is insufficient`.
+5. Do not draft plan tasks until the refreshed index is available and valid.
+
 Example:
 Instead of reading `app.ts`, use index context such as:
 "`app.ts` handles app logic and is used by `main.ts`"
@@ -62,6 +72,7 @@ Apply these defaults unless the user asks for extra depth:
 - Fallback for non-task workflows: use `.spectral/feature.json` only as a compatibility fallback.
 - Populate `<task-folder>/plan.md` using `.spectral/templates/plan-template.md`.
 - **Tech Stack Compliance**: Load `.spectral/memory/tech_stack.json` before writing the plan. The plan must adhere to the detected tech stack (no unauthorized frameworks or version conflicts).
+- **Index Enforcement**: If the code index is missing or stale, refresh it in incremental mode first and only then proceed with planning.
 - Do NOT create an extra `feature_directory` wrapper just to store the plan.
 
 ## Scope Check
