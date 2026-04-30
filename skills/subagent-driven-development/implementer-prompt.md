@@ -23,13 +23,14 @@ Task tool (general-purpose):
     1. **Strict Version Compliance**: You MUST strictly adhere to the technology versions defined in `.spectral/memory/tech_stack.json`. Never use modern patterns for legacy versions (e.g., Angular 21 patterns in a v17 project) unless explicitly instructed.
     2. **No Unasked Refactoring**: Implement ONLY what is in the task. Do NOT restructure existing code, move logic between components, or refactor architecture unless the task specifically mandates "Refactor [X]".
     3. **TDD First**: You MUST follow the `spectral:test-driven-development` skill. Write a failing test, watch it fail, then implement the minimal code to pass.
+    4. **Isolated Feature Additions**: If the task is a feature addition, add ONLY that feature without making any modifications to the current codebase, unless and until it is strictly required for the codebase to execute or pass tests.
 
     ## Your Job
 
     Once you're clear on requirements:
     1. Implement exactly what the task specifies
     2. Write tests (following TDD if task says to)
-    3. Verify implementation works (including a **runtime smoke check** like `ng serve` or `npm run dev` for runnable apps)
+    3. Verify implementation works. You MUST perform a **runtime smoke check** using the appropriate build/start command for the technology stack (e.g., `ng serve`, `npm run dev`, `mvn spring-boot:run`, etc.) and explicitly check the terminal output to ensure there are no compilation or runtime errors.
     4. Commit your work
     5. Self-review (see below)
     6. Report back
