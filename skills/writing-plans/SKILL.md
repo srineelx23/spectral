@@ -9,6 +9,8 @@ description: Use when you have a spec or requirements for a multi-step task, bef
 
 Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
 
+**Project Scaffolding**: If planning a new application from an empty directory, the very first task MUST be to execute the appropriate terminal scaffolding command (e.g., `npx create-vite@latest .`, `ng new`, `npx create-react-app`). Do NOT plan to manually create `node_modules`, `package.json`, or basic root boilerplate files. The subsequent tasks should build on top of the scaffolded structure.
+
 ## Code Index Usage Rule
 
 ## INDEX-FIRST EXECUTION POLICY

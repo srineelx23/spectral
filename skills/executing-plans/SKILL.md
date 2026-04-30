@@ -52,6 +52,8 @@ For each task:
 3. Run verifications as specified
 4. Mark as completed
 
+**Project Scaffolding**: When bootstrapping a new project from an empty directory, you MUST use the appropriate framework CLI or scaffolding tools (e.g., `npx create-vite`, `ng new`) via terminal commands. Do NOT manually create `node_modules`, `package.json`, or root structural files. Wait for the terminal command to finish executing before proceeding to build the application on top of that scaffolded root folder.
+
 ### Verification pacing
 
 - Batch all planned edits for the current task before running build or test commands.

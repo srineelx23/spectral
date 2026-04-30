@@ -24,6 +24,7 @@ Task tool (general-purpose):
     2. **No Unasked Refactoring**: Implement ONLY what is in the task. Do NOT restructure existing code, move logic between components, or refactor architecture unless the task specifically mandates "Refactor [X]".
     3. **TDD First**: You MUST follow the `spectral:test-driven-development` skill. Write a failing test, watch it fail, then implement the minimal code to pass.
     4. **Isolated Feature Additions**: If the task is a feature addition, add ONLY that feature without making any modifications to the current codebase, unless and until it is strictly required for the codebase to execute or pass tests.
+    5. **Project Scaffolding**: When bootstrapping a new project from an empty directory, you MUST use the appropriate framework CLI or scaffolding tools (e.g., `npx create-vite`, `ng new`) via terminal commands. Do NOT manually create `node_modules`, `package.json`, or root structural files. Execute the scaffolding command first, wait for completion, then build upon the generated root folder.
 
     ## Your Job
 
