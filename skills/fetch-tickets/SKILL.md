@@ -1,11 +1,11 @@
 ---
 name: fetch-tickets
-description: "Retrieves tickets from external sources Jira and initializes them into the Spectral workspace as local folders and entries in the tasks.json registry."
+description: "Retrieves tickets from Jira via MCP and initializes them into the Spectral workspace as local folders and entries in the tasks.json registry."
 ---
 
 # Fetch Tickets
 
-Retrieve tickets from external sources and normalize them into the Spectral workspace structure.
+Retrieve tickets from Jira and normalize them into the Spectral workspace structure.
 
 ## Code Index Usage Rule
 
@@ -40,9 +40,13 @@ This rule is mandatory and applies before any file search or repository scan.
 ## Steps
 
 ### 1. Fetch Tickets
-- Use the Jira `cloudId` (retrieved from configuration or environment) to fetch tickets.
-- Do **NOT** use JQL or other search-based retrieval methods.
-- Extract: `id`, `title`, `description`, `acceptance criteria`, `priority`, `url`, `status` (as `remoteStatus`), and any other details if mentioned.
+- Use the MCP tool `jira_search_issues` to fetch tickets from Jira.
+- Authentication and Jira configuration are handled automatically via `mcp-config.json`.
+- Do NOT prompt the user for API token, email, or domain.
+- Use JQL query:
+  project = {PROJECT_KEY} ORDER BY created DESC
+- Maximum results: 50
+- Extract: `id`, `summary` (as title), `description`, `priority`, `url`, `status` (as `remoteStatus`).
 
 ### 1.1 Extract Ticket Keywords
 - For each Jira ticket, extract keywords from `title` + `description`.
@@ -112,13 +116,3 @@ Jira
   "priority": "{PRIORITY}",
   "remoteStatus": "{REMOTE_STATUS}"
 }
-```
-
-## Strict Rules
-- **Pure Intake**: Do NOT brainstorm, plan, or write code.
-- **Data Integrity**: Do NOT overwrite existing folders or modify existing registry entries.
-- **No Inference**: Do NOT add assumptions or "clarifications" to the description.
-- **Normalization**: Clean and normalize description text; convert ACs to bullet points.
-- **Index-First Jira Resolution**: All Jira tasks must be resolved using index-first strategy.
-- **No Global Search**: Do NOT search the entire repository or scan directories for Jira task file discovery.
-- **Cloud ID Only**: Only retrieve tickets from the specified Jira `cloudId`. Do NOT use JQL.
