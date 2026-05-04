@@ -1,28 +1,17 @@
-# Superpowers
+# Spectral
 
-Superpowers is a complete software development workflow for your coding agents, built on top of a set of composable "skills" and some initial instructions that make sure your agent uses them.
+Spectral is a plugin bundle for Copilot CLI built around composable skills and session hooks.
 
 ## How it works
 
-It starts from the moment you fire up your coding agent. As soon as it sees that you're building something, it *doesn't* just jump into trying to write code. Instead, it steps back and asks you what you're really trying to do. 
+Spectral is installed as a Copilot plugin. When a new session starts, the hook chain loads the plugin context and the Copilot skill loader discovers the skill files under `skills/`.
 
-Once it's teased a spec out of the conversation, it shows it to you in chunks short enough to actually read and digest. 
+The important pieces are:
 
-After you've signed off on the design, your agent puts together an implementation plan that's clear enough for an enthusiastic junior engineer with poor taste, no judgement, no project context, and an aversion to testing to follow. It emphasizes true red/green TDD, YAGNI (You Aren't Gonna Need It), and DRY. 
-
-Next up, once you say "go", it launches a *subagent-driven-development* process, having agents work through each engineering task, inspecting and reviewing their work, and continuing forward. It's not uncommon for Claude to be able to work autonomously for a couple hours at a time without deviating from the plan you put together.
-
-There's a bunch more to it, but that's the core of the system. And because the skills trigger automatically, you don't need to do anything special. Your coding agent just has Superpowers.
-
-
-## Sponsorship
-
-If Superpowers has helped you do stuff that makes money and you are so inclined, I'd greatly appreciate it if you'd consider [sponsoring my opensource work](https://github.com/sponsors/obra).
-
-Thanks! 
-
-- Jesse
-
+1. `hooks/hooks.json` tells the host which hook to run.
+2. `hooks/run-hook.cmd` is the cross-platform wrapper that launches the hook script.
+3. `hooks/session-start` injects startup context into the session.
+4. `skills/*/SKILL.md` contains the skill metadata and instructions.
 
 ## Installation
 
@@ -101,90 +90,43 @@ To update:
 gemini extensions update spectral
 ```
 
-### Verify Installation
+## Verify Installation
 
-Start a new session in your chosen platform and ask for something that should trigger a skill (for example, "help me plan this feature" or "let's debug this issue"). The agent should automatically invoke the relevant spectral skill.
+Start a new Copilot session and ask for something that should trigger a skill, such as planning a feature or debugging an issue. The agent should load the relevant skill automatically.
 
-## The Basic Workflow
+## Skills Library
 
-1. **brainstorming** - Activates before writing code. Refines rough ideas through questions, explores alternatives, presents design in sections for validation. Saves design document.
+Current skills in this repository:
 
-2. **using-git-worktrees** - Activates after design approval. Creates isolated workspace on new branch, runs project setup, verifies clean test baseline.
+### Collaboration
+- `brainstorming` - Refine requirements and produce a design direction.
+- `dispatching-parallel-agents` - Coordinate multiple agents in parallel.
+- `executing-plans` - Run implementation plans in batches with checkpoints.
+- `requesting-code-review` - Review completed work against the plan.
+- `receiving-code-review` - Respond to review feedback.
+- `using-git-worktrees` - Work in isolated branches and worktrees.
+- `finishing-a-development-branch` - Wrap up and clean up after implementation.
+- `subagent-driven-development` - Drive implementation with task-level subagents.
+- `writing-plans` - Break a design into executable tasks.
 
-3. **writing-plans** - Activates with approved design. Breaks work into bite-sized tasks (2-5 minutes each). Every task has exact file paths, complete code, verification steps.
+### Testing and Debugging
+- `test-driven-development` - Apply RED-GREEN-REFACTOR for implementation.
+- `systematic-debugging` - Use a structured root-cause debugging process.
+- `verification-before-completion` - Confirm fixes before closing work.
 
-4. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with two-stage review (spec compliance, then code quality), or executes in batches with human checkpoints.
+### Project Support
+- `execute-task` - Execute a single focused task.
+- `fetch-tickets` - Retrieve and select work items.
+- `init` - Bootstrap a new workspace session.
+- `update-jira-status` - Sync task progress back to Jira.
 
-5. **test-driven-development** - Activates during implementation. Enforces RED-GREEN-REFACTOR: write failing test, watch it fail, write minimal code, watch it pass, commit. Deletes code written before tests.
-
-6. **requesting-code-review** - Activates between tasks. Reviews against plan, reports issues by severity. Critical issues block progress.
-
-7. **finishing-a-development-branch** - Activates when tasks complete. Verifies tests, presents options (merge/PR/keep/discard), cleans up worktree.
-
-**The agent checks for relevant skills before any task.** Mandatory workflows, not suggestions.
-
-## What's Inside
-
-### Skills Library
-
-**Testing**
-- **test-driven-development** - RED-GREEN-REFACTOR cycle (includes testing anti-patterns reference)
-
-**Debugging**
-- **systematic-debugging** - 4-phase root cause process (includes root-cause-tracing, defense-in-depth, condition-based-waiting techniques)
-- **verification-before-completion** - Ensure it's actually fixed
-
-**Collaboration** 
-- **brainstorming** - Socratic design refinement
-- **writing-plans** - Detailed implementation plans
-- **executing-plans** - Batch execution with checkpoints
-- **dispatching-parallel-agents** - Concurrent subagent workflows
-- **requesting-code-review** - Pre-review checklist
-- **receiving-code-review** - Responding to feedback
-- **using-git-worktrees** - Parallel development branches
-- **finishing-a-development-branch** - Merge/PR decision workflow
-- **subagent-driven-development** - Fast iteration with two-stage review (spec compliance, then code quality)
-
-**Meta**
-- **writing-skills** - Create new skills following best practices (includes testing methodology)
-- **using-superpowers** - Introduction to the skills system
-
-## Philosophy
-
-- **Test-Driven Development** - Write tests first, always
-- **Systematic over ad-hoc** - Process over guessing
-- **Complexity reduction** - Simplicity as primary goal
-- **Evidence over claims** - Verify before declaring success
-
-Read more: [Superpowers for Claude Code](https://blog.fsck.com/2025/10/09/superpowers/)
+### Meta
+- `writing-skills` - Create and verify new skills.
 
 ## Contributing
 
 Skills live directly in this repository. To contribute:
 
-1. Fork the repository
-2. Create a branch for your skill
-3. Follow the `writing-skills` skill for creating and testing new skills
-4. Submit a PR
-
-See `skills/writing-skills/SKILL.md` for the complete guide.
-
-## Updating
-
-Skills update automatically when you update the plugin:
-
-```bash
-/plugin update spectral
-```
-
-## License
-
-MIT License - see LICENSE file for details
-
-## Community
-
-Superpowers is built by [Jesse Vincent](https://blog.fsck.com) and the rest of the folks at [Prime Radiant](https://primeradiant.com).
-
-- **Discord**: [Join us](https://discord.gg/35wsABTejz) for community support, questions, and sharing what you're building with Superpowers
-- **Issues**: https://github.com/obra/superpowers/issues
-- **Release announcements**: [Sign up](https://primeradiant.com/superpowers/) to get notified about new versions
+1. Create a branch for your change.
+2. Follow `skills/writing-skills/SKILL.md` for skill authoring guidance.
+3. Submit a PR with the updated skill or hook content.
