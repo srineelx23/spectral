@@ -304,15 +304,17 @@ function extractCalls(snippet) {
 function collectFunctions(text) {
   const signatures = [];
   const patterns = [
-    /\bfunction\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/g,
-    /\b(?:const|let|var)\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>/g,
-    /\bclass\s+([A-Za-z_][A-Za-z0-9_]*)\b/g
+    /\bfunction\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)/g,
+    /\b(?:const|let|var)\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:async\s*)?\(([^)]*)\)\s*=>/g,
+    /\b(?:const|let|var)\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:async\s*)?([^=\(\n]+)\s*=>/g
   ];
 
   for (const regex of patterns) {
     let match = regex.exec(text);
     while (match) {
-      signatures.push({ name: match[1], start: match.index });
+      const name = match[1];
+      const params = match[2] !== undefined ? match[2].trim() : '';
+      signatures.push({ name, params, start: match.index });
       match = regex.exec(text);
     }
   }
@@ -323,21 +325,24 @@ function collectFunctions(text) {
   for (let i = 0; i < signatures.length; i += 1) {
     const current = signatures[i];
     const next = signatures[i + 1];
-    const end = next ? Math.min(next.start, current.start + 1200) : Math.min(text.length, current.start + 1200);
+    const end = next ? Math.min(next.start, current.start + 2000) : Math.min(text.length, current.start + 2000);
     const snippet = text.slice(current.start, end);
-    functions.push({
-      name: current.name,
-      purpose: inferPurposeFromName(current.name),
-      calls: extractCalls(snippet)
-    });
+
+    // Try to infer a return expression
+    const returnMatch = /return\s+([^;\n\{]+)/.exec(snippet);
+    let ret = 'void';
+    if (returnMatch && returnMatch[1]) {
+      ret = returnMatch[1].trim();
+      if (ret.length > 80) ret = ret.slice(0, 77) + '...';
+    }
+
+    const paramsClean = current.params.replace(/\s+/g, ' ').trim();
+    const signature = `${current.name}(${paramsClean}) -> ${ret}`;
+    functions.push(signature);
   }
 
-  const deduped = new Map();
-  for (const fn of functions) {
-    if (!deduped.has(fn.name)) deduped.set(fn.name, fn);
-  }
-
-  return Array.from(deduped.values()).slice(0, 25);
+  const deduped = Array.from(new Set(functions));
+  return deduped.slice(0, 50);
 }
 
 function resolveInternalImport(importPath, currentFilePath, allPathsSet) {
@@ -443,14 +448,10 @@ async function buildFileEntry(file, allPathsSet) {
 
   const uniqueDependsOn = Array.from(new Set(dependsOn)).slice(0, 30);
   const functions = kind === 'config' ? [] : collectFunctions(text);
-  const responsibility = inferResponsibility(kind, file.relPath, featureTags);
-
   return {
     path: file.relPath,
     language,
     kind,
-    responsibility,
-    summary: '',
     featureTags,
     dependsOn: uniqueDependsOn,
     usedBy: [],
@@ -474,7 +475,6 @@ function wireUsedBy(files) {
 
   for (const entry of Object.values(files)) {
     entry.usedBy = Array.from(new Set(entry.usedBy)).sort();
-    entry.summary = buildSummary(entry);
   }
 }
 
@@ -501,30 +501,7 @@ function validateCodeIndex(files, features) {
     errors.push(`... and ${missingFeatureTags - 5} more files missing featureTags.`);
   }
 
-  // Check 3: All files have summaries
-  let missingSummaries = 0;
-  for (const [filePath, entry] of Object.entries(files)) {
-    if (!entry.summary || entry.summary.trim().length === 0) {
-      missingSummaries += 1;
-      if (missingSummaries <= 5) {
-        errors.push(`${filePath}: Missing summary. Summary is required for index-first mapping.`);
-      }
-    }
-  }
-  if (missingSummaries > 5) {
-    errors.push(`... and ${missingSummaries - 5} more files missing summaries.`);
-  }
-
-  // Check 4: All files have responsibility
-  let missingResponsibility = 0;
-  for (const [filePath, entry] of Object.entries(files)) {
-    if (!entry.responsibility || entry.responsibility.trim().length === 0) {
-      missingResponsibility += 1;
-    }
-  }
-  if (missingResponsibility > 0) {
-    warnings.push(`${missingResponsibility} files missing responsibility description.`);
-  }
+  // Removed summary/responsibility checks per text-indexed output requirement
 
   return { errors, warnings };
 }
@@ -537,7 +514,7 @@ export async function generateCodeIndex({
   const resolvedTarget = path.resolve(targetDir);
   const outputPath = outPath
     ? path.resolve(outPath)
-    : path.join(resolvedTarget, '.spectral', 'code_index.json');
+    : path.join(resolvedTarget, '.spectral', 'code_index.txt');
 
   const scopedFiles = collectScopedFiles(resolvedTarget);
   const allPathsSet = new Set(scopedFiles.map((f) => f.relPath));
@@ -615,20 +592,36 @@ export async function generateCodeIndex({
     console.warn(`⚠ Code index warnings:\n${effectiveValidation.warnings.join('\n')}\n`);
   }
 
-  const result = {
-    version: 2,
-    mode,
-    metadataOnly: true,
-    generatedAt: new Date().toISOString(),
-    root: normalizePath(resolvedTarget),
-    files,
-    features,
-    stats
-  };
+  // Produce a human-readable text index instead of JSON
+  const lines = [];
+  lines.push(`# Code index generated: ${new Date().toISOString()}`);
+  lines.push(`# Root: ${normalizePath(resolvedTarget)}`);
+  lines.push(``);
+  for (const filePath of Object.keys(files).sort()) {
+    const entry = files[filePath];
+    lines.push(`--- FILE: ${filePath}`);
+    lines.push(`path: ${entry.path}`);
+    lines.push(`language: ${entry.language}`);
+    lines.push(`kind: ${entry.kind}`);
+    lines.push(`featureTags: ${entry.featureTags.join(', ')}`);
+    lines.push(`dependsOn: ${entry.dependsOn.length ? entry.dependsOn.join(', ') : 'none'}`);
+    lines.push(`usedBy: ${entry.usedBy.length ? entry.usedBy.join(', ') : 'none'}`);
+    lines.push(`functions:`);
+    if (entry.functions && entry.functions.length) {
+      for (const fn of entry.functions) {
+        lines.push(`  - ${fn}`);
+      }
+    } else {
+      lines.push(`  - (none)`);
+    }
+    lines.push(`mtimeMs: ${entry.mtimeMs}`);
+    lines.push(`size: ${entry.size}`);
+    lines.push(``);
+  }
 
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   const tempPath = `${outputPath}.tmp`;
-  fs.writeFileSync(tempPath, JSON.stringify(result, null, 2), 'utf8');
+  fs.writeFileSync(tempPath, lines.join('\n'), 'utf8');
   fs.renameSync(tempPath, outputPath);
 
   return {
