@@ -42,12 +42,10 @@ Before any task execution step, the agent MUST ensure `.spectral/code_index.txt`
 
 **Announce at start:** "I'm using the execute-task skill to run the selected task lifecycle."
 
-## Scope
-
-- **Source of truth:** `tasks.json`, Jira-synced entries, or an explicit user prompt for ad hoc work
-- **Task lifecycle:** brainstorm -> plan -> TDD (Red-Green-Refactor) -> verify
-- **Out of scope:** git branch management, merges, PRs, or any git control actions
-- **Creativity Rule:** TDD defines the *boundaries* (what must happen), not the *path* (how it's written). Use the Green and Refactor phases for creative problem solving and elegant implementation.
+## Execution Mode
+- **Autonomous Workflow**: Once a task is selected and the plan is approved, execute the remaining lifecycle steps (Implementation, Verification, Status Updates) autonomously.
+- **Minimize Intermediate Prompts**: Do not ask for confirmation before switching between sub-skills (e.g., from brainstorming to planning) unless the sub-skill itself requires a user gate (like spec approval).
+- **Silent Progress**: Prefer updating the user on progress via status messages rather than asking "Can I move to the next phase?".
 
 ## Task Intake Modes
 
@@ -76,6 +74,7 @@ If task metadata is incomplete, ask targeted clarification questions before plan
 
 2. **Display and Select Task**
    - For registry-backed work, show a numbered list: `id`, `title`, `priority` (if present), `status`.
+   - **MANDATORY SELECTION GATE**: You MUST NOT automatically select a task or proceed without explicit user confirmation. Even if one task seems more "relevant" than others, you must present the options and wait for the user to choose by number or ID.
    - Ask user to select by number or id, or choose to enter a custom prompt.
    - For freeform work, capture the user's prompt as the active task and confirm the wording before proceeding.
 
@@ -146,4 +145,4 @@ Do not guess through blockers.
 - Maximum file reads per execution: 8.
 - Never search the entire repository for Jira execution.
 - Never scan directories for Jira execution when index entries are available.
-- **STRICT VERSION COMPLIANCE**: You MUST strictly adhere to the technology versions defined in `.spectral/memory/tech_stack.json`. Never use modern patterns for legacy versions (e.g., Angular 21 patterns in an Angular 17 project) unless explicitly instructed.
+- **STRICT VERSION & RULE COMPLIANCE**: You MUST strictly adhere to the technology versions defined in `.spectral/memory/tech_stack.json` AND the coding standards in the rule files (*.md) within `.spectral/rules/`. Never use modern patterns for legacy versions or ignore the project's established directory structure and CLI commands.

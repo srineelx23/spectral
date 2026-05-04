@@ -129,7 +129,7 @@ Prefer the smallest change that solves the task. Avoid broad refactors unless re
 All behavior changes must be verified with the most relevant available test command(s): ${tests.join(', ')}.
 
 ### IV. Stack-Aligned Engineering
-Project conventions must align with the detected stack: ${stacksText}. Use native tooling and idiomatic patterns for the detected ecosystem.
+Project conventions must align with the detected stack: ${stacksText}. Use native tooling and idiomatic patterns for the detected ecosystem. You MUST strictly adhere to the hardcoded coding standards and directory structures defined in the rule files (*.md) within \`.spectral/rules/\`.
 
 ### V. Traceable Delivery
 Changes must be reproducible and reviewable: clear file-level edits, deterministic scripts, and concise verification summaries.
@@ -145,6 +145,7 @@ Operational constraints:
 - Preserve existing project structure and naming unless explicitly requested.
 - Keep generated artifacts under .spectral for workflow state and templates.
 - Prefer script-driven generation over verbose in-chat generation to reduce token usage.
+- **Mandatory Rules**: Before writing code, always check \`.spectral/rules/\` for tech-stack specific instructions.
 
 ## Development Workflow
 
@@ -174,15 +175,24 @@ export function generateConstitution({ targetDir = process.cwd(), outPath, rules
   const folders = listTopLevelFolders(resolvedTarget);
   const userRules = normalizeRules(rulesText);
   
-  // Apply Tech Stack Overrides & Angular Rules
-  if (techStack.frontend) {
-    const { framework, version } = techStack.frontend;
-    if (framework === 'Angular') {
-      const targetVersion = version && !version.includes('latest') ? version : '21 (Latest)';
-      userRules.unshift(`STRICT VERSION COMPLIANCE: This project uses Angular v${targetVersion}. You MUST strictly follow Angular v${targetVersion} standards. Never use newer patterns if an older version is specified.`);
-      stacks = [`${framework} ${version || ''}`];
+  // Apply Tech Stack Overrides & Framework Rules
+  ['frontend', 'backend'].forEach((layer) => {
+    const stackInfo = techStack[layer];
+    if (stackInfo && stackInfo.framework) {
+      const { framework, version } = stackInfo;
+      const displayVersion = version && !version.includes('latest') ? version : 'Latest';
+      const stackName = `${framework} ${displayVersion}`.trim();
+      
+      // Prepend to stacks if not already present
+      if (!stacks.some(s => s.startsWith(framework))) {
+        stacks.unshift(stackName);
+      }
+
+      // Add mandatory rule compliance for this framework
+      const rulePrefix = framework.toLowerCase();
+      userRules.unshift(`STRICT ${framework.toUpperCase()} COMPLIANCE: This project uses ${stackName}. You MUST strictly follow ${framework} standards and the specific rules found in \`.spectral/rules/${rulePrefix}-*.md\`.`);
     }
-  }
+  });
 
   const today = new Date().toISOString().slice(0, 10);
   const projectName = path.basename(resolvedTarget) || 'Project';
@@ -232,3 +242,4 @@ const __filename = fileURLToPath(import.meta.url);
 if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
   cli();
 }
+

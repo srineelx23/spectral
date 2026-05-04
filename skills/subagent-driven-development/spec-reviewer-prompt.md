@@ -49,6 +49,11 @@ Task tool (general-purpose):
     - Did they over-engineer or add unnecessary features?
     - Did they add "nice to haves" that weren't in spec?
 
+    **Tech-Stack & Rule Compliance:**
+    - **Mandatory Rules**: Read all `.md` files in `.spectral/rules/` and verify the implementation strictly follows the project's coding standards, directory structures, and CLI command patterns.
+    - Did they place files in the correct directories (e.g. `src/app/components/` for Angular)?
+    - Did they follow the prescribed naming conventions and architectural patterns?
+
     **Misunderstandings:**
     - Did they interpret requirements differently than intended?
     - Did they solve the wrong problem?

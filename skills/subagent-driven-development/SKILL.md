@@ -81,8 +81,9 @@ Before dispatching any subagent, do context partitioning from index:
 1. Load `.spectral/code_index.txt`.
 2. Build per-subagent file subsets from `featureTags`, `summary`, `responsibility`, and dependency links.
 3. Attach only the subset relevant to that subagent's scope.
-4. Reuse already-read file cache across all subagents.
-5. Enforce max 5 files per subagent.
+4. **ALWAYS attach all .md files from `.spectral/rules/` to every subagent's context.**
+5. Reuse already-read file cache across all subagents.
+6. Enforce max 5 project files per subagent (rules files do not count toward this limit).
 
 ```dot
 digraph process {
@@ -285,7 +286,7 @@ Done!
 - Dispatch multiple implementation subagents in parallel (conflicts)
 - Make subagent read plan file (provide full text instead)
 - Give subagents full-repository context when index-filtered subsets are available
-- Allow global repo reads inside subagents
+- Allow global repo reads inside subagents (EXCEPT for `.spectral/rules/` which MUST be readable).
 - Allow duplicate file reads across subagents when cache/subset reuse is possible
 - Skip scene-setting context (subagent needs to understand where task fits)
 - Ignore subagent questions (answer before letting them proceed)

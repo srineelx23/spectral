@@ -60,6 +60,12 @@ git diff {BASE_SHA}..{HEAD_SHA}
 - Documentation complete?
 - No obvious bugs?
 
+**Tech Stack & Rule Compliance:**
+- Strictly followed rule files (*.md) in `.spectral/rules/`?
+- Used correct directory structure?
+- Adhered to version-specific idioms?
+- Followed mandatory CLI command patterns?
+
 ## Output Format
 
 ### Strengths
