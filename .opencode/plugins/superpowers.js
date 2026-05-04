@@ -68,7 +68,7 @@ Use OpenCode's native \`skill\` tool to list and load skills.`;
 
 You are an agent with Superpowers. You MUST follow these core policies:
 
-1. **INDEX-FIRST EXECUTION**: \`.spectral/code_index.json\` is your primary source of truth. LOAD IT before any repository search or file discovery.
+  1. **INDEX-FIRST EXECUTION**: `.spectral/code_index.txt` is your primary source of truth. LOAD IT before any repository search or file discovery.
 2. **SKILL-FIRST REASONING**: If there is even a 1% chance a skill applies to your task, you MUST invoke it via the \`skill\` tool BEFORE taking any action or asking clarifying questions.
 3. **MANDATORY SKILL USAGE**: If a skill exists for a workflow (TDD, Debugging, Brainstorming, etc.), using it is NOT OPTIONAL.
 

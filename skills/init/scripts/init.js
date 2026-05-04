@@ -139,7 +139,7 @@ async function init() {
         }
 
         // 5. Generate a metadata-only code index for index-first retrieval.
-        const codeIndexDest = path.join(spectralFolder, 'code_index.json');
+        const codeIndexDest = path.join(spectralFolder, 'code_index.txt');
         try {
             // Use 'full' mode on first initialization, 'incremental' for updates
             const indexExists = fs.existsSync(codeIndexDest);
@@ -151,7 +151,7 @@ async function init() {
                 mode
             });
             console.log(
-                `Created: .spectral/code_index.json (${codeIndexResult.stats.scannedFiles} scanned, ${codeIndexResult.stats.reusedFiles} reused, ${codeIndexResult.stats.changedFiles} changed, ${codeIndexResult.stats.deletedFiles} deleted)`
+                `Created: .spectral/code_index.txt (${codeIndexResult.stats.scannedFiles} scanned, ${codeIndexResult.stats.reusedFiles} reused, ${codeIndexResult.stats.changedFiles} changed, ${codeIndexResult.stats.deletedFiles} deleted)`
             );
         } catch (indexError) {
             console.warn(`Warning: code index generation failed (${indexError.message}). Init will continue without index.`);

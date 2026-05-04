@@ -11,7 +11,7 @@ Run a task-centered workflow from a registry entry or user-provided prompt: sele
 
 ## INDEX-FIRST EXECUTION POLICY
 
-- code_index.json is the primary source of truth
+- code_index.txt is the primary source of truth
 - repository search is a last resort
 - file discovery MUST happen through index
 - repeated file reads are prohibited
@@ -21,7 +21,7 @@ If index is available, ignoring it is considered a failure.
 
 This rule is mandatory and applies before any file search or repository scan.
 
-1. Load and consult `.spectral/code_index.json` first.
+1. Load and consult `.spectral/code_index.txt` first.
 2. Prefer `features` to identify feature-related files.
 3. Use `files` metadata to locate exact file paths.
 4. Expand only with `dependsOn` and `usedBy` when needed.
@@ -32,9 +32,9 @@ This rule is mandatory and applies before any file search or repository scan.
 
 ## Enforced Index Refresh Gate
 
-Before any task execution step, the agent MUST ensure `.spectral/code_index.json` exists and is current.
+Before any task execution step, the agent MUST ensure `.spectral/code_index.txt` exists and is current.
 
-1. Load `.spectral/code_index.json`.
+1. Load `.spectral/code_index.txt`.
 2. If it is missing, regenerate it with `--mode incremental` before any further discovery.
 3. If the workspace has changed since the index was generated, regenerate it with `--mode incremental` before any further discovery.
 4. If regeneration fails, stop and report `Index is insufficient`.
@@ -96,7 +96,7 @@ If task metadata is incomplete, ask targeted clarification questions before plan
 6. **Execute Plan (Index-First Flow)**
    - All Jira tasks and index-backed tasks must be resolved using the index-first strategy.
    - **Execution Process**:
-        1. **Refresh `code_index.json` & Rules**: Load and validate `.spectral/code_index.json` before any file discovery action. Read all `.md` files in `.spectral/rules/` to ensure the subagent will be dispatched with the correct standards.
+      1. **Refresh `code_index.txt`**: Load and validate `.spectral/code_index.txt` before any file discovery action. If missing or stale, regenerate it in incremental mode first, then validate it.
      2. **Task to Feature Mapping**: Extract keywords (title/description for Jira) and match against `featureTags`, `summary`, and `responsibility` in the index.
      3. **File Selection**: Select the minimum file set directly from index metadata (Primary files from feature matches, Secondary from `dependsOn`).
      4. **Execution Mode**: Ask execution mode:
@@ -141,7 +141,7 @@ Do not guess through blockers.
 - **Automated Jira Sync**: Perform Jira status updates as a standard part of the task lifecycle without requiring additional explicit user prompts for each transition.
 - Never scan the entire `src` directory.
 - Never re-read files already loaded for the current execution.
-- Never call search tools if `code_index.json` has relevant entries.
+   - Never call search tools if `code_index.txt` has relevant entries.
 - Maximum file reads per execution: 8.
 - Never search the entire repository for Jira execution.
 - Never scan directories for Jira execution when index entries are available.

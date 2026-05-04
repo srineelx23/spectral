@@ -11,7 +11,7 @@ Select an active ticket and turn requirements into a formal design specification
 
 ## INDEX-FIRST EXECUTION POLICY
 
-- code_index.json is the primary source of truth
+- code_index.txt is the primary source of truth
 - repository search is a last resort
 - file discovery MUST happen through index
 - repeated file reads are prohibited
@@ -21,7 +21,7 @@ If index is available, ignoring it is considered a failure.
 
 This rule is mandatory and applies before any file read, file search, or repository scan.
 
-1. Load and consult `.spectral/code_index.json` first.
+1. Load and consult `.spectral/code_index.txt` first.
 2. Use index metadata to understand feature boundaries, relevant modules, and dependencies before reading any file.
 3. Replace directory scanning with index lookup.
 4. Replace file discovery with feature mapping.
@@ -34,9 +34,9 @@ This rule is mandatory and applies before any file read, file search, or reposit
 
 ## Enforced Index Refresh Gate
 
-Before any specification work begins, the agent MUST ensure `.spectral/code_index.json` exists and is current.
+Before any specification work begins, the agent MUST ensure `.spectral/code_index.txt` exists and is current.
 
-1. Check whether `.spectral/code_index.json` exists.
+1. Check whether `.spectral/code_index.txt` exists.
 2. If it is missing, regenerate it with `--mode incremental` before continuing.
 3. If the workspace has changed since the index was generated, regenerate it with `--mode incremental` before continuing.
 4. If regeneration fails, stop and report `Index is insufficient`.
@@ -90,8 +90,8 @@ Update in:
 
 1. **Select active ticket** — From `.spectral/registry/tasks.json`
 2. **Load ticket** — Read `.spectral/tasks/{TICKET_ID}/ticket.md`
-3. **Refresh index gate** — Ensure `.spectral/code_index.json` exists and is current before any further reasoning. If missing or stale, regenerate it in incremental mode and validate the output.
-4. **Understand requirement** — Use `.spectral/code_index.json` as primary context for feature boundaries, module mapping, and dependency expansion
+3. **Refresh index gate** — Ensure `.spectral/code_index.txt` exists and is current before any further reasoning. If missing or stale, regenerate it in incremental mode and validate the output.
+4. **Understand requirement** — Use `.spectral/code_index.txt` as primary context for feature boundaries, module mapping, and dependency expansion
 5. **Detect ambiguity** — Look for ambiguities impacting behavior or architecture
 6. **Apply Clarification Gate** — If needed, ask all questions and wait
 7. **Detect Tech Stack & Rules** — Load `.spectral/memory/tech_stack.json` and read all rules in `.spectral/rules/*.md` to ensure design approach is compatible with the project's tech stack and standards.
@@ -104,7 +104,7 @@ Update in:
 
 ## Context Usage
 
-- Use `.spectral/code_index.json` as primary source
+- Use `.spectral/code_index.txt` as primary source
 - Replace repository scanning with index lookup and feature mapping
 - Prefer summaries in the index over opening files
 - Do not use grep/glob when index has relevant entries
