@@ -57,7 +57,7 @@ ONLY produce the specification.
 - Load `.spectral/registry/tasks.json`
 - Identify tickets with status = PENDING
 - Display available tickets (id, title, priority)
-- Ask user to select one ticket ID
+- **MANDATORY SELECTION GATE**: You MUST NOT automatically select a task. Show the list and ask the user to select one ticket ID. Wait for their response before proceeding.
 - Set selected ticket as active
 
 - Update status:
@@ -94,7 +94,7 @@ Update in:
 4. **Understand requirement** — Use `.spectral/code_index.json` as primary context for feature boundaries, module mapping, and dependency expansion
 5. **Detect ambiguity** — Look for ambiguities impacting behavior or architecture
 6. **Apply Clarification Gate** — If needed, ask all questions and wait
-7. **Detect Tech Stack** — Load `.spectral/memory/tech_stack.json` to ensure design approach is compatible with the project's tech stack.
+7. **Detect Tech Stack & Rules** — Load `.spectral/memory/tech_stack.json` and read all rules in `.spectral/rules/*.md` to ensure design approach is compatible with the project's tech stack and standards.
 8. **Define assumptions** — Explicitly state any assumptions made
 9. **Generate 2–3 approaches** — Include pros/cons for each
 10. **Select best approach** — Select one with justification

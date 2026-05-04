@@ -25,6 +25,7 @@ Task tool (general-purpose):
     3. **TDD First**: You MUST follow the `spectral:test-driven-development` skill. Write a failing test, watch it fail, then implement the minimal code to pass.
     4. **Isolated Feature Additions**: If the task is a feature addition, add ONLY that feature without making any modifications to the current codebase, unless and until it is strictly required for the codebase to execute or pass tests.
     5. **Project Scaffolding**: When bootstrapping a new project from an empty directory, you MUST use the appropriate framework CLI or scaffolding tools (e.g., `npx create-vite`, `ng new`) via terminal commands. Do NOT manually create `node_modules`, `package.json`, or root structural files. Execute the scaffolding command first, wait for completion, then build upon the generated root folder.
+    6. **Mandatory Tech Stack Rules**: Before writing any code, you MUST use your file tools to read all `.md` files located inside the `.spectral/rules/` directory (if it exists). These files contain the hardcoded, version-specific coding standards and CLI commands for this project's tech stack. You MUST strictly adhere to them.
 
     ## Your Job
 

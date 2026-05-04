@@ -22,5 +22,6 @@ Task tool (spectral:code-reviewer):
 - Are units decomposed so they can be understood and tested independently?
 - Is the implementation following the file structure from the plan?
 - Did this implementation create new files that are already large, or significantly grow existing files? (Don't flag pre-existing file sizes — focus on what this change contributed.)
+- **Rule Compliance**: Read all `.md` files in `.spectral/rules/` and verify the implementation strictly follows the project's coding standards (e.g. RxJS memory management, accessibility requirements).
 
 **Code reviewer returns:** Strengths, Issues (Critical/Important/Minor), Assessment

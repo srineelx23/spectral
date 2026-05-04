@@ -57,59 +57,29 @@ After init, `.spectral/code_index.json` is the default source of truth for code 
 - For unsupported languages, fall back to a lightweight structural parser (imports, declarations) instead of failing.
 - Unknown text-like files should still be indexed with minimal metadata so discovery remains language-agnostic.
 
-## Copilot CLI Requirement
-
-In Copilot CLI, after /spectral:init is activated, the agent must produce a fully drafted constitution via script output. It must not leave .spectral/memory/constitution.md as template placeholders.
-
-If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), the agent must switch to the no-shell path immediately and must not retry shell commands repeatedly.
+## Execution Mode
+- **Autonomous Lifecycle**: Perform the full initialization lifecycle in a single, fluid pass.
+- **Do NOT pause** for intermediate chat confirmations between steps (e.g., after rules summary, after script execution, or before indexing) unless a step explicitly requires user input (e.g., confidence < 0.8 during tech detection).
+- **Silent Scripting**: Prefer running scripts and tools immediately. Only stop to report final success or if a critical error occurs.
+- **Avoid Multi-turn Chat**: Do not ask "Should I proceed?" or "Ready for the next step?". Assume the user wants the full workspace initialized when they invoke `init`.
 
 ## Steps
 
-1. **Send an Immediate User Prompt**:
-   - First response after activation must be a clear status message so the user knows init is running.
-   - Use this exact message:
-     - `Spectral init started. I am creating your .spectral workspace and preparing your project constitution. Please enter your project rules (bullet points are fine).`
+1. **Initialize and Gather Project Rules**:
+   - **First Response**: Immediately announce the start and ask for project rules.
+   - **Proactive Inquiry**: Use this consolidated message:
+     - `Spectral init started. I am creating your .spectral workspace and preparing your project constitution. Beyond the standard tech-stack rules, are there any project-specific coding standards, architectural preferences, or team conventions you'd like to permanently codify in the constitution? (Bullet points are fine).`
+   - **Build Summary**: Convert the user's response into 3-8 short bullets.
+   - **Memory Storage**: Keep this summary in memory as `<compact rules summary>` for the initialization script.
+   - **Persistence**: These rules will be codified in `.spectral/memory/constitution.md`.
 
-2. **Build a Compact Rules Summary**:
-   - Convert the user request into 3-8 short bullets.
-   - Keep this summary concise to reduce token usage.
-    - Keep it in memory as `<compact rules summary>` for script input.
-
-**CRITICAL SEQUENCE**: You MUST complete the **Tech Stack Detection** (Step 6) and save `.spectral/memory/tech_stack.json` BEFORE finalizing the **Constitution**. The constitution must strictly reflect the versions detected.
+**CRITICAL SEQUENCE**: You MUST complete the **Tech Stack Detection** (Step 3) and save `.spectral/memory/tech_stack.json` BEFORE running the initialization script and finalizing the **Constitution**. The constitution must strictly reflect the versions detected.
 
 **STRICT VERSIONING RULE**: You MUST strictly adhere to the technology versions defined in `tech_stack_json`. Never use modern patterns for legacy versions (e.g., Angular 21 patterns in an Angular 17 project) unless explicitly instructed.
 
-3. **Execute Initialization Script Immediately**:
-    - Do NOT create any fwhatiles manually before running the script.
-    - Do NOT use shell commands for directory or file creation.
-    - Directly run:
-     - `node "<spectral-repo>/skills/init/scripts/init.js"`
-    - Pass user rules via environment variable:
-       - `SPECTRAL_INIT_RULES="<compact rules summary>"`
-
-4. **If Script Fails -> Fallback**:
-    - Only if the Node script execution fails, create files manually using file tools (NOT shell).
-
-5. **No-Shell Fallback (File Tools Only)**:
-    - Create these paths with file tools (NOT shell):
-       - .spectral/memory/constitution.md
-       - .spectral/templates/spec-template.md
-       - .spectral/templates/plan-template.md
-       - .spectral/templates/tasks-template.md
-       - .spectral/templates/constitution-template.md
-   - Infer project signals with file listing/search tools (for example: package.json, angular.json, src/, apps/, libs/).
-   - Write a compact but concrete constitution directly to .spectral/memory/constitution.md using:
-     - Project name from current directory
-     - 5 concrete principles
-     - **Tech Stack Enforcement section**: MUST include a rule to strictly adhere to the versions in `tech_stack.json`. For Angular, always follow the latest (v21) unless an older version is detected, in which case strictly follow that version.
-     - User rules section (including prompts provided during init)
-     - Workflow section
-     - Governance section with current date
-   - Never leave placeholders in .spectral/memory/constitution.md.
-   - Keep output concise; avoid verbose narrative to reduce tokens.
-
-6. **Tech Stack Detection (Existing Projects Only)**:
-    - If the repository already contains source code, detect the tech stack before confirmation.
+3. **Tech Stack Detection (Existing Projects Only)**:
+    - **CRITICAL**: This MUST be done before running the init script or generating the constitution.
+    - If the repository already contains source code, detect the tech stack.
     - **Detection Rules (High Priority Files Only)**:
         - Check in this order:
             1. **Node.js / Frontend / Fullstack**: `package.json` (extract dependencies, devDependencies, engines.node), lock files (`package-lock.json` / `yarn.lock` / `pnpm-lock.yaml`).
@@ -131,11 +101,40 @@ If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), 
       }
       ```
     - **Save Results**:
-      1. Write JSON to: `.spectral/memory/tech_stack.json`
+      1. Write JSON to: `.spectral/memory/tech_stack.json` (Create the folder if needed).
     - **Validation**:
       - If confidence < 0.8:
         Ask user: "I detected the following tech stack. Please confirm or correct it."
       - Do NOT leave files empty.
+
+4. **Execute Initialization Script**:
+    - Do NOT create any files manually before running the script (except `.spectral/memory/tech_stack.json`).
+    - Do NOT use shell commands for directory or file creation (except for the tech stack folder).
+    - Directly run:
+      - `node "<spectral-repo>/skills/init/scripts/init.js"`
+    - Pass user rules via environment variable:
+        - `SPECTRAL_INIT_RULES="<compact rules summary>"`
+
+5. **If Script Fails -> Fallback**:
+    - Only if the Node script execution fails, create files manually using file tools (NOT shell).
+
+6. **No-Shell Fallback (File Tools Only)**:
+    - Create these paths with file tools (NOT shell):
+       - .spectral/memory/constitution.md
+       - .spectral/templates/spec-template.md
+       - .spectral/templates/plan-template.md
+       - .spectral/templates/tasks-template.md
+       - .spectral/templates/constitution-template.md
+   - Infer project signals with file listing/search tools (for example: package.json, angular.json, src/, apps/, libs/).
+   - Write a compact but concrete constitution directly to .spectral/memory/constitution.md using:
+     - Project name from current directory
+     - 5 concrete principles
+     - **Tech Stack Enforcement section**: MUST include a rule to strictly adhere to the versions in `tech_stack.json`. For Angular, always follow the latest (v21) unless an older version is detected, in which case strictly follow that version.
+     - User rules section (including prompts provided during init)
+     - Workflow section
+     - Governance section with current date
+   - Never leave placeholders in .spectral/memory/constitution.md.
+   - Keep output concise; avoid verbose narrative to reduce tokens.
 
 7. **Generate Code Index**:
     - Purpose: Create `.spectral/code_index.json`, a semantic metadata index of all project files.
@@ -155,6 +154,7 @@ If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), 
             "usedBy": ["path/to/consumer1.ts"],
             "functions": [{name, purpose, calls}],
             "mtimeMs": timestamp,
+            
             "size": bytes
           }
         },

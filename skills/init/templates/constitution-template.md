@@ -40,6 +40,7 @@ All development must adhere to `.spectral/memory/tech_stack.json`.
 - No unauthorized frameworks
 - No version conflicts
 - Must follow stack conventions
+- **Mandatory Rule Adherence**: You MUST strictly adhere to the hardcoded coding standards and directory structures defined in the rule files (*.md) within `.spectral/rules/`. Before writing code, you MUST use your file tools to read all rule files in that directory.
 
 ## [SECTION_3_NAME]
 <!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->

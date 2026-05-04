@@ -73,7 +73,7 @@ Apply these defaults unless the user asks for extra depth:
 - If task metadata is missing, ask the user for the exact task folder before writing the plan.
 - Fallback for non-task workflows: use `.spectral/feature.json` only as a compatibility fallback.
 - Populate `<task-folder>/plan.md` using `.spectral/templates/plan-template.md`.
-- **Tech Stack Compliance**: Load `.spectral/memory/tech_stack.json` before writing the plan. The plan must adhere to the detected tech stack (no unauthorized frameworks or version conflicts).
+- **Tech Stack & Rule Compliance**: Load `.spectral/memory/tech_stack.json` and read all `.md` files in `.spectral/rules/` before writing the plan. The plan must adhere to the detected tech stack AND the specific coding standards/directory structures defined in the rules (e.g., Angular component locations).
 - **Index Enforcement**: If the code index is missing or stale, refresh it in incremental mode first and only then proceed with planning.
 - Do NOT create an extra `feature_directory` wrapper just to store the plan.
 

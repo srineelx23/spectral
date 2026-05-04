@@ -30,12 +30,11 @@ This rule is mandatory and applies before any file search or repository scan.
 7. Maximum files to read must come from the index, not from search.
 8. If the index is missing or outdated, allow limited search only, capped at 3 files.
 
-## Target Structure
-
-- **Configuration**: `.spectral/config.json`
-- **Ticket Folder**: `.spectral/tasks/{TICKET_ID}/`
-- **Ticket File**: `.spectral/tasks/{TICKET_ID}/ticket.md`
-- **Registry**: `.spectral/registry/tasks.json`
+## Execution Mode
+- **Autonomous Import**: Once the project key or JQL is provided, perform the full fetch and import lifecycle in a single, fluid pass.
+- **Do NOT pause** to ask for confirmation before converting descriptions, extracting acceptance criteria, or updating the registry.
+- **Full Extraction Policy**: You MUST extract all available ticket data (including full descriptions and acceptance criteria) and populate the `ticket.md` templates completely in the first pass. Never leave sections blank for later refinement if the data is available in Jira.
+- **Silent Processing**: Only stop to report the final summary of imported tickets.
 
 ## Steps
 
@@ -46,7 +45,9 @@ This rule is mandatory and applies before any file search or repository scan.
 - Use JQL query:
   project = {PROJECT_KEY} ORDER BY created DESC
 - Maximum results: 50
-- Extract: `id`, `summary` (as title), `description`, `priority`, `url`, `status` (as `remoteStatus`).
+- **Data Completeness**: Use `expand=renderedFields` in the request to get formatted descriptions.
+- Extract: `id`, `summary` (as title), `renderedFields.description` (convert HTML to clean Markdown), `priority`, `url`, `status` (as `remoteStatus`).
+- **Acceptance Criteria**: Search the description and custom fields for Acceptance Criteria; if found, extract them as bullet points.
 
 ### 1.1 Extract Ticket Keywords
 - For each Jira ticket, extract keywords from `title` + `description`.
@@ -67,44 +68,12 @@ This rule is mandatory and applies before any file search or repository scan.
 - If the `id` already exists, **SKIP** that ticket.
 
 ### 3. Create Folder structure
-- For each new ticket, create `.spectral/tasks/{TICKET_ID}/`.
+- For each new ticket, create `.spectral/tasks/{TICKET_ID}/` ensuring all parent directories are created recursively (e.g., `mkdir -p`).
 
 ### 4. Generate `ticket.md`
-- Create `.spectral/tasks/{TICKET_ID}/ticket.md` using the template:
-
-# {TICKET_ID}-{TITLE}
-
-## Status
-PENDING
-
-## Source
-Jira
-
-## Priority
-{PRIORITY}
-
-## Created At
-{CURRENT_TIMESTAMP}
-
----
-
-## Description
-{CLEANED_DESCRIPTION}
-
----
-
-## Acceptance Criteria
-{BULLET_POINTS_OF_AC}
-
----
-
-## Notes
-* 
-
----
-
-## Links
-* {URL}
+- **Template Usage**: Load and populate the template from `.spectral/templates/ticket-template.md`.
+- Ensure all placeholders (`{TICKET_ID}`, `{TITLE}`, `{CLEANED_DESCRIPTION}`, etc.) are correctly replaced with Jira data.
+- Save the result to `.spectral/tasks/{TICKET_ID}/ticket.md`.
 
 ### 5. Update Registry
 - Append to `.spectral/registry/tasks.json`:
