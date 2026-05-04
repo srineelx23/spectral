@@ -11,7 +11,7 @@ Execute plan by dispatching fresh subagent per task, with two-stage review after
 
 ## INDEX-FIRST EXECUTION POLICY
 
-- code_index.json is the primary source of truth
+-- code_index.txt is the primary source of truth
 - repository search is a last resort
 - file discovery MUST happen through index
 - repeated file reads are prohibited
@@ -21,7 +21,7 @@ If index is available, ignoring it is considered a failure.
 
 This rule is mandatory and applies before any file search or repository scan.
 
-1. Load and consult `.spectral/code_index.json` first.
+1. Load and consult `.spectral/code_index.txt` first.
 2. Prefer `features` to identify feature-related files.
 3. Use `files` metadata to locate exact file paths.
 4. Expand only with `dependsOn` and `usedBy` when needed.
@@ -34,7 +34,7 @@ This rule is mandatory and applies before any file search or repository scan.
 
 Subagents should operate on index-filtered file subsets only.
 
-- Each subagent must receive only relevant files selected from `.spectral/code_index.json`, never full-project context.
+- Each subagent must receive only relevant files selected from `.spectral/code_index.txt`, never full-project context.
 - Partition subagent context using index features when work is independent:
   - Subagent A -> feature `todo`
   - Subagent B -> feature `theme`
@@ -78,7 +78,7 @@ digraph when_to_use {
 
 Before dispatching any subagent, do context partitioning from index:
 
-1. Load `.spectral/code_index.json`.
+1. Load `.spectral/code_index.txt`.
 2. Build per-subagent file subsets from `featureTags`, `summary`, `responsibility`, and dependency links.
 3. Attach only the subset relevant to that subagent's scope.
 4. Reuse already-read file cache across all subagents.

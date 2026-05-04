@@ -4,7 +4,7 @@
 
 ## INDEX-FIRST EXECUTION POLICY
 
-- code_index.json is the primary source of truth
+- code_index.txt is the primary source of truth
 - repository search is a last resort
 - file discovery MUST happen through index
 - repeated file reads are prohibited

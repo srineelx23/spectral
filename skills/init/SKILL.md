@@ -11,7 +11,7 @@ Use this skill when the user wants to initialize a new Spectral workspace in the
 
 ## INDEX-FIRST EXECUTION POLICY
 
-- code_index.json is the primary source of truth
+- code_index.txt is the primary source of truth
 - repository search is a last resort
 - file discovery MUST happen through index
 - repeated file reads are prohibited
@@ -21,7 +21,7 @@ If index is available, ignoring it is considered a failure.
 
 This rule is mandatory and applies before any file search or repository scan.
 
-1. Load and consult `.spectral/code_index.json` first.
+1. Load and consult `.spectral/code_index.txt` first.
 2. Prefer `features` to identify feature-related files.
 3. Use `files` metadata to locate exact file paths.
 4. Expand only with `dependsOn` and `usedBy` when needed.
@@ -32,9 +32,9 @@ This rule is mandatory and applies before any file search or repository scan.
 
 ## Index-First Retrieval Requirement
 
-After init, `.spectral/code_index.json` is the default source of truth for code discovery.
+After init, `.spectral/code_index.txt` is the default source of truth for code discovery.
 
-- Mandatory pre-step before any coding reasoning: load `.spectral/code_index.json`.
+-- Mandatory pre-step before any coding reasoning: load `.spectral/code_index.txt`.
 - Select top 3-5 relevant files using `featureTags`, `summary`, and `kind`.
 - Explicitly state which files were selected and why, then continue with implementation.
 - Do not run full-repository search as a default path.
@@ -42,14 +42,14 @@ After init, `.spectral/code_index.json` is the default source of truth for code 
 
 ## Hard Rule
 
-- The agent must not blindly scan the whole repository before consulting `.spectral/code_index.json`.
+-- The agent must not blindly scan the whole repository before consulting `.spectral/code_index.txt`.
 - The agent must not open random files before selecting relevant candidates from the index.
 
 ## Incremental Indexing Requirement
 
 - Init must run code index generation in `incremental` mode.
 - Incremental mode must reprocess only files with changed metadata (`mtime`/size) and remove deleted paths from the index.
-- Unchanged files must be reused directly from the previous `.spectral/code_index.json` entry.
+-- Unchanged files must be reused directly from the previous `.spectral/code_index.txt` entry.
 
 ## Multi-Language Support Requirement
 
@@ -138,7 +138,7 @@ If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), 
       - Do NOT leave files empty.
 
 7. **Generate Code Index**:
-    - Purpose: Create `.spectral/code_index.json`, a semantic metadata index of all project files.
+    - Purpose: Create `.spectral/code_index.txt`, a semantic metadata index of all project files in human-readable text format.
     - This index is the **PRIMARY SOURCE OF TRUTH** for all index-first file discovery across skills.
     - **Index Structure** (version 2, metadata-only):
       ```json
@@ -167,10 +167,10 @@ If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), 
       ```
     - **Generation Process**:
       1. Run the code index generator:
-         - **Command**: `node "<spectral-repo>/scripts/generate-code-index.js" --target <project-root> --out .spectral/code_index.json --mode full`
+         - **Command**: `node "<spectral-repo>/scripts/generate-code-index.js" --target <project-root> --out .spectral/code_index.txt --mode full`
          - **Parameters**:
            - `--target`: Project root directory (defaults to cwd)
-           - `--out`: Output path (defaults to `.spectral/code_index.json`)
+           - `--out`: Output path (defaults to `.spectral/code_index.txt`)
            - `--mode`: `full` for complete reindex, `incremental` to reuse unchanged files
       2. The script will:
          - Scan all meaningful source files (JS/TS/Python/Java/Go/C++)
@@ -189,7 +189,7 @@ If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), 
       - Every file will have at least one featureTags entry (deterministic feature mapping)
       - Dependency graph will be bidirectional (dependsOn ↔ usedBy)
     - **Post-Generation**:
-      - Commit `.spectral/code_index.json` to version control
+      - Commit `.spectral/code_index.txt` to version control
       - Regenerate whenever major files are added/removed (or use `incremental` mode for fast updates)
       - Use as primary input for brainstorming, planning, and task execution
 
@@ -197,11 +197,10 @@ If shell execution is unavailable (for example: `pwsh.exe` missing on Windows), 
     - Verify that the `.spectral` structure is complete and report success.
     - Confirm that `.spectral/memory/constitution.md` contains concrete sections with no unresolved placeholder tokens.
     - Confirm that `.spectral/memory/tech_stack.json` exists and contains the detected or confirmed stack.
-    - Confirm that `.spectral/code_index.json` exists and was generated as metadata-only output.
-    - Confirm that `.spectral/code_index.json` is pretty-printed (multi-line JSON with 2-space indentation).
-    - Confirm that `.spectral/code_index.json` validation passed (no empty features, all files have summaries).
+    - Confirm that `.spectral/code_index.txt` exists and was generated as the textual index output.
+    - Confirm that `.spectral/code_index.txt` validation passed (no empty features).
 
 9. **User Confirmation Loop**:
     - Show a concise summary of what was written.
-    - Ask: `I drafted your constitution in .spectral/memory/constitution.md, detected your tech stack in .spectral/memory/tech_stack.json, and generated your code index in .spectral/code_index.json. What would you like to change?`
+    - Ask: `I drafted your constitution in .spectral/memory/constitution.md, detected your tech stack in .spectral/memory/tech_stack.json, and generated your code index in .spectral/code_index.txt. What would you like to change?`
     - If user provides edits, update the constitution, tech stack, or trigger code index regeneration immediately.

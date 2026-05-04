@@ -11,9 +11,9 @@ Write comprehensive implementation plans assuming the engineer has zero context 
 
 ## Code Index Usage Rule
 
-## INDEX-FIRST EXECUTION POLICY
+-## INDEX-FIRST EXECUTION POLICY
 
-- code_index.json is the primary source of truth
+- code_index.txt is the primary source of truth
 - repository search is a last resort
 - file discovery MUST happen through index
 - repeated file reads are prohibited
@@ -23,7 +23,7 @@ If index is available, ignoring it is considered a failure.
 
 This rule is mandatory and applies before any file search, file read, or repository scan.
 
-1. Load and consult `.spectral/code_index.json` first.
+1. Load and consult `.spectral/code_index.txt` first.
 2. Generate plans primarily from index metadata:
     - `files.summary`
     - `files.responsibility`
@@ -38,9 +38,9 @@ This rule is mandatory and applies before any file search, file read, or reposit
 
 ## Enforced Index Refresh Gate
 
-Before writing a plan, the agent MUST ensure `.spectral/code_index.json` exists and is current.
+Before writing a plan, the agent MUST ensure `.spectral/code_index.txt` exists and is current.
 
-1. Load `.spectral/code_index.json`.
+1. Load `.spectral/code_index.txt`.
 2. If the file is missing, regenerate it with `--mode incremental` before planning.
 3. If the workspace has changed since the index was generated, regenerate it with `--mode incremental` before planning.
 4. If regeneration fails, stop and report `Index is insufficient`.
