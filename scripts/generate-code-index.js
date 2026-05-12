@@ -301,6 +301,40 @@ function extractCalls(snippet) {
   return Array.from(calls).slice(0, 10);
 }
 
+function extractMethodSignatures(text) {
+  const signatures = [];
+  const classRegex = /class\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:extends\s+[^{]+)?\{([\s\S]*?)\n\}/g;
+
+  let classMatch = classRegex.exec(text);
+  while (classMatch) {
+    const classBody = classMatch[2] || '';
+    const methodRegex = /(?:public\s+|private\s+|protected\s+|static\s+|async\s+|readonly\s+)*([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*(?::\s*([^\{;\n]+))?\s*\{/g;
+
+    let methodMatch = methodRegex.exec(classBody);
+    while (methodMatch) {
+      const name = methodMatch[1];
+      if (['constructor', 'if', 'for', 'while', 'switch', 'catch'].includes(name)) {
+        methodMatch = methodRegex.exec(classBody);
+        continue;
+      }
+
+      signatures.push({
+        name,
+        params: methodMatch[2] !== undefined ? methodMatch[2].trim() : '',
+        returnType: methodMatch[3] !== undefined ? methodMatch[3].trim() : '',
+        isAsync: /async\s+/.test(methodMatch[0]),
+        start: classMatch.index + methodMatch.index
+      });
+
+      methodMatch = methodRegex.exec(classBody);
+    }
+
+    classMatch = classRegex.exec(text);
+  }
+
+  return signatures;
+}
+
 function collectFunctions(text) {
   const signatures = [];
   const patterns = [
@@ -317,6 +351,10 @@ function collectFunctions(text) {
       signatures.push({ name, params, start: match.index });
       match = regex.exec(text);
     }
+  }
+
+  for (const methodSignature of extractMethodSignatures(text)) {
+    signatures.push(methodSignature);
   }
 
   signatures.sort((a, b) => a.start - b.start);

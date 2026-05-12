@@ -6,19 +6,22 @@ import { generateCodeIndex } from '../../../scripts/generate-code-index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const spectralRoot = path.resolve(__dirname, '..', '..', '..');
-const targetDir = process.cwd();
-
-const spectralFolder = path.join(targetDir, '.spectral');
-const templatesFolder = path.join(spectralFolder, 'templates');
-const memoryFolder = path.join(spectralFolder, 'memory');
-const tasksFolder = path.join(spectralFolder, 'tasks');
-const registryFolder = path.join(spectralFolder, 'registry');
-const rulesFolder = path.join(spectralFolder, 'rules');
-const specsFolder = path.join(targetDir, 'specs');
 
 const sourceTemplatesDir = path.join(spectralRoot, 'skills', 'init', 'templates');
 
 async function init() {
+    const targetDir = path.resolve(
+        process.env.SPECTRAL_TARGET_DIR || process.env.INIT_CWD || process.cwd()
+    );
+    
+    const spectralFolder = path.join(targetDir, '.spectral');
+    const templatesFolder = path.join(spectralFolder, 'templates');
+    const memoryFolder = path.join(spectralFolder, 'memory');
+    const tasksFolder = path.join(spectralFolder, 'tasks');
+    const registryFolder = path.join(spectralFolder, 'registry');
+    const rulesFolder = path.join(spectralFolder, 'rules');
+    const specsFolder = path.join(targetDir, 'specs');
+
     console.log(`Initializing Spectral in: ${targetDir}`);
     console.log("Running init.js via Node...");
     console.log("Platform:", process.platform);

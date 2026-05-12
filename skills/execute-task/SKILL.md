@@ -82,7 +82,8 @@ If task metadata is incomplete, ask targeted clarification questions before plan
    - Mark selected registry task as `IN_PROGRESS` in `tasks.json`.
    - **Jira Sync**: If the task originated from Jira, use `spectral:update-jira-status` to update the remote board to `IN_PROGRESS` or `Ongoing`.
    - Record `startedAt` timestamp if absent.
-   - For freeform prompts, store the prompt text in the active session or task context that drives brainstorming and planning.
+   - For freeform prompts, generate a deterministic local ID (e.g., `local-001`), create the folder `.spectral/tasks/{ID}/`, and initialize a `ticket.md` using the prompt text.
+   - **Register Local Task**: Add the new task to `.spectral/registry/tasks.json` with status `IN_PROGRESS` to ensure the lifecycle remains disk-persistent.
 
 4. **Run Brainstorming**
    - **REQUIRED SUB-SKILL:** Use `spectral:brainstorming`.
